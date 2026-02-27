@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm run build:ts)",
+      "Bash(npx tstl --project tsconfig.tstl.json)",
+      "Bash(chmod +x /home/dev/tslua/scripts/start.sh)",
+      "Bash(chmod +x /home/dev/tslua/start.sh)",
+      "Bash(./start.sh help)",
+      "Bash(./start.sh build)",
+      "Bash(./scripts/build_proto.sh)",
+      "Bash(chmod +x /home/dev/tslua/scripts/build_tables.sh)",
+      "Bash(sudo apt-get install -y dotnet-runtime-8.0 dotnet-sdk-8.0)"
+    ]
+  }
+}

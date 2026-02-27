@@ -1,0 +1,82 @@
+syntax = "proto3";
+
+package login;
+
+import "common.proto";
+
+/**
+ * 登录请求
+ */
+message LoginRequest {
+  string username = 1;      // 用户名
+  string password = 2;      // 密码（应该是加密后的）
+  string device_id = 3;     // 设备ID
+  string platform = 4;      // 平台
+}
+
+/**
+ * 登录响应
+ */
+message LoginResponse {
+  common.ErrorCode code = 1;
+  string message = 2;
+  UserInfo user = 3;        // 用户信息
+  string token = 4;         // 登录token
+}
+
+/**
+ * 用户信息
+ */
+message UserInfo {
+  uint32 user_id = 1;       // 用户ID
+  string username = 2;      // 用户名
+  uint64 login_time = 3;    // 登录时间
+  uint32 level = 4;         // 等级
+  uint64 exp = 5;           // 经验值
+}
+
+/**
+ * 登出请求
+ */
+message LogoutRequest {
+  uint32 user_id = 1;
+}
+
+/**
+ * 登出响应
+ */
+message LogoutResponse {
+  common.ErrorCode code = 1;
+  string message = 2;
+}
+
+/**
+ * Token验证请求
+ */
+message ValidateTokenRequest {
+  string token = 1;
+}
+
+/**
+ * Token验证响应
+ */
+message ValidateTokenResponse {
+  common.ErrorCode code = 1;
+  string message = 2;
+  uint32 user_id = 3;
+  bool valid = 4;           // 是否有效
+}
+
+/**
+ * 获取在线用户数请求
+ */
+message GetOnlineCountRequest {
+  // 空请求
+}
+
+/**
+ * 获取在线用户数响应
+ */
+message GetOnlineCountResponse {
+  uint32 count = 1;
+}

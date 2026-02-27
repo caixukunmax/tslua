@@ -1,0 +1,27 @@
+node_modules/
+dist/
+build/
+*.log
+*.tsbuildinfo
+.DS_Store
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.env
+coverage/
+.nyc_output/
+
+# Protocol Buffers 生成文件
+src/common/protos/proto.js
+src/common/protos/proto.d.ts
+src/common/protos/index.ts
+*.desc
+
+# Luban 生成文件
+src/common/tables/
+config/tables/datas/**/*.xlsx
+config/tables/datas/**/*.lua
+config/tables/datas/**/*.json
+config/tables/datas/**/*.xml

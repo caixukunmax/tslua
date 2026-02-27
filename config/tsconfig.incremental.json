@@ -1,0 +1,7 @@
+{
+  "extends": "./tsconfig.tstl.json",
+  "compilerOptions": {
+    "incremental": true,
+    "tsBuildInfoFile": "./dist/.tsbuildinfo"
+  }
+}

@@ -1,0 +1,140 @@
+syntax = "proto3";
+
+package game;
+
+import "common.proto";
+
+/**
+ * 玩家信息
+ */
+message PlayerInfo {
+  uint32 user_id = 1;       // 用户ID
+  uint32 level = 2;         // 等级
+  uint64 exp = 3;           // 经验值
+  uint64 gold = 4;          // 金币
+  uint64 enter_time = 5;    // 进入时间
+}
+
+/**
+ * 进入游戏请求
+ */
+message EnterGameRequest {
+  uint32 user_id = 1;
+  string token = 2;         // 登录token
+}
+
+/**
+ * 进入游戏响应
+ */
+message EnterGameResponse {
+  common.ErrorCode code = 1;
+  string message = 2;
+  PlayerInfo player = 3;    // 玩家信息
+}
+
+/**
+ * 离开游戏请求
+ */
+message LeaveGameRequest {
+  uint32 user_id = 1;
+}
+
+/**
+ * 离开游戏响应
+ */
+message LeaveGameResponse {
+  common.ErrorCode code = 1;
+  string message = 2;
+}
+
+/**
+ * 获取玩家信息请求
+ */
+message GetPlayerInfoRequest {
+  uint32 user_id = 1;
+}
+
+/**
+ * 获取玩家信息响应
+ */
+message GetPlayerInfoResponse {
+  common.ErrorCode code = 1;
+  string message = 2;
+  PlayerInfo player = 3;
+}
+
+/**
+ * 玩家属性更新
+ */
+message PlayerUpdate {
+  uint32 level = 1;         // 等级（0表示不更新）
+  uint64 exp = 2;           // 经验值（0表示不更新）
+  uint64 gold = 3;          // 金币（0表示不更新）
+}
+
+/**
+ * 更新玩家信息请求
+ */
+message UpdatePlayerRequest {
+  uint32 user_id = 1;
+  PlayerUpdate update = 2;
+}
+
+/**
+ * 更新玩家信息响应
+ */
+message UpdatePlayerResponse {
+  common.ErrorCode code = 1;
+  string message = 2;
+  PlayerInfo player = 3;    // 更新后的玩家信息
+}
+
+/**
+ * 获取在线玩家数请求
+ */
+message GetOnlinePlayersRequest {
+  // 空请求
+}
+
+/**
+ * 获取在线玩家数响应
+ */
+message GetOnlinePlayersResponse {
+  uint32 count = 1;
+  repeated PlayerInfo players = 2;  // 在线玩家列表
+}
+
+/**
+ * 增加经验请求
+ */
+message AddExpRequest {
+  uint32 user_id = 1;
+  uint64 exp_amount = 2;    // 经验值数量
+}
+
+/**
+ * 增加经验响应
+ */
+message AddExpResponse {
+  common.ErrorCode code = 1;
+  string message = 2;
+  PlayerInfo player = 3;    // 更新后的玩家信息
+  bool level_up = 4;        // 是否升级
+}
+
+/**
+ * 增加金币请求
+ */
+message AddGoldRequest {
+  uint32 user_id = 1;
+  uint64 gold_amount = 2;   // 金币数量
+}
+
+/**
+ * 增加金币响应
+ */
+message AddGoldResponse {
+  common.ErrorCode code = 1;
+  string message = 2;
+  PlayerInfo player = 3;    // 更新后的玩家信息
+}

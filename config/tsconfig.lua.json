@@ -1,0 +1,20 @@
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "lib": ["ES2020"],
+    "module": "ES2020",
+    "moduleResolution": "node",
+    "strict": true,
+    "rootDir": "../src",
+    "outDir": "../dist/lua"
+  },
+  "tstl": {
+    "luaTarget": "5.4",
+    "luaLibImport": "require",
+    "sourceMapTraceback": true,
+    "noImplicitSelf": true,
+    "noHeader": true
+  },
+  "include": ["../src/**/*"],
+  "exclude": ["../node_modules", "../**/*.spec.ts"]
+}
