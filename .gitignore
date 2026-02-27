@@ -21,7 +21,12 @@ src/common/protos/index.ts
 
 # Luban 生成文件
 src/common/tables/
-config/tables/datas/**/*.xlsx
+
+# Luban 运行时生成数据（不提交）
 config/tables/datas/**/*.lua
 config/tables/datas/**/*.json
 config/tables/datas/**/*.xml
+config/tables/datas/**/*.yml
+config/tables/datas/**/*.yaml
+config/tables/datas/**/*.asset
+config/tables/datas/**/*.lit
