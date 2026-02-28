@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Protocol Buffers 编译配置",
+  "description": "配置 proto 源文件目录和输出目录",
+  "proto_dirs": [
+    "proto"
+  ],
+  "output_lua": [
+    "../server/dist/lua/protos"
+  ],
+  "output_ts": [
+    "../server/src/protos"
+  ]
+}

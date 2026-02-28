@@ -2,25 +2,22 @@
   "name": "ts-skynet-hybrid",
   "version": "1.0.0",
   "description": "TS-Skynet Hybrid Development Framework - TypeScript to Skynet Lua Runtime",
-  "main": "dist/nodejs/index.js",
+  "private": true,
+  "workspaces": [
+    "server",
+    "protocols",
+    "tables"
+  ],
   "scripts": {
-    "dev": "ts-node src/app/bootstrap-node.ts",
-    "dev:node": "./scripts/dev.sh node",
-    "dev:up": "./scripts/dev.sh up",
-    "dev:up:daemon": "./scripts/dev.sh up:daemon",
-    "build": "./scripts/build.sh all",
-    "build:ts": "./scripts/build.sh ts",
-    "build:ts:watch": "./scripts/build.sh ts:watch",
-    "build:engine": "./scripts/build.sh engine",
-    "build:proto": "./scripts/build_proto.sh",
-    "build:clean": "./scripts/build.sh clean",
-    "server:start": "./scripts/server.sh start",
-    "server:start:daemon": "./scripts/server.sh start -d",
-    "server:stop": "./scripts/server.sh stop",
-    "server:restart": "./scripts/server.sh restart",
-    "server:status": "./scripts/server.sh status",
-    "hotfix": "./scripts/dev.sh hotfix",
-    "setup": "./scripts/dev.sh setup"
+    "dev": "cd server && npm run dev",
+    "build": "cd server && npm run build",
+    "build:ts": "cd server && npm run build:ts",
+    "build:proto": "cd protocols && npm run build",
+    "build:tables": "cd tables && npm run build",
+    "server:start": "cd server && npm run server:start",
+    "server:stop": "cd server && npm run server:stop",
+    "server:restart": "cd server && npm run server:restart",
+    "setup": "cd server && npm run setup"
   },
   "keywords": [
     "typescript",
@@ -30,12 +27,5 @@
     "actor-model"
   ],
   "author": "",
-  "license": "MIT",
-  "devDependencies": {
-    "@types/node": "^20.0.0",
-    "lua-types": "^2.13.1",
-    "ts-node": "^10.9.0",
-    "typescript": "^5.3.0",
-    "typescript-to-lua": "^1.33.2"
-  }
+  "license": "MIT"
 }

@@ -14,19 +14,19 @@ coverage/
 .nyc_output/
 
 # Protocol Buffers 生成文件
-src/common/protos/proto.js
-src/common/protos/proto.d.ts
-src/common/protos/index.ts
+server/src/common/protos/proto.js
+server/src/common/protos/proto.d.ts
+server/src/common/protos/index.ts
 *.desc
 
 # Luban 生成文件
-src/common/tables/
+server/src/tables/
 
 # Luban 运行时生成数据（不提交）
-config/tables/datas/**/*.lua
-config/tables/datas/**/*.json
-config/tables/datas/**/*.xml
-config/tables/datas/**/*.yml
-config/tables/datas/**/*.yaml
-config/tables/datas/**/*.asset
-config/tables/datas/**/*.lit
+tables/datas/**/*.lua
+tables/datas/**/*.json
+tables/datas/**/*.xml
+tables/datas/**/*.yml
+tables/datas/**/*.yaml
+tables/datas/**/*.asset
+tables/datas/**/*.lit

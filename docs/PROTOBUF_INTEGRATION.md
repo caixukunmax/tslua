@@ -14,7 +14,7 @@
                        ▼
 ┌─────────────────────────────────────────────────────────────┐
 │              Proto 类型定义层                                │
-│      (src/common/protos/proto.d.ts, proto.js)              │
+│      (src/protos/proto.d.ts, proto.js)              │
 │         TypeScript 类型 + 运行时实现                        │
 └──────────────────────┬──────────────────────────────────────┘
                        │ encode/decode/create
@@ -65,8 +65,8 @@ message LoginResponse {
 ### 2. 生成代码（可选，已有简化版）
 
 项目已包含简化版的 proto 实现：
-- `src/common/protos/proto.d.ts` - TypeScript 类型定义
-- `src/common/protos/proto.js` - Node.js 运行时（JSON 序列化）
+- `src/protos/proto.d.ts` - TypeScript 类型定义
+- `src/protos/proto.js` - Node.js 运行时（JSON 序列化）
 
 如需标准 protobuf 二进制编码，运行：
 ```bash
@@ -164,7 +164,7 @@ export interface IRuntime {
 - 标准 protobuf 二进制编码
 - 适用于生产环境
 
-### 4. 类型定义 (src/common/protos/)
+### 4. 类型定义 (src/protos/)
 
 | 文件 | 说明 |
 |-----|------|
@@ -175,7 +175,7 @@ export interface IRuntime {
 ## 消息 ID 映射
 
 ```typescript
-// src/common/protos/proto.js
+// src/protos/proto.js
 const MessageId = {
   // Gateway: 100-199
   HEARTBEAT_REQ: 100,
@@ -318,8 +318,8 @@ runtime.network.dispatch('lua', async (session, source, ...args) => {
 ### 添加新消息
 
 1. 编辑 `common/protos/*.proto` 添加消息定义
-2. 更新 `src/common/protos/proto.d.ts` 添加类型
-3. 更新 `src/common/protos/proto.js` 添加实现
+2. 更新 `src/protos/proto.d.ts` 添加类型
+3. 更新 `src/protos/proto.js` 添加实现
 4. 更新 `MessageId` 和 `MessageTypes` 映射
 5. 业务代码中使用新消息
 

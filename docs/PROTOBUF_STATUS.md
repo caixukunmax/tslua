@@ -33,10 +33,10 @@
 
 | 文件 | 说明 |
 |-----|------|
-| `src/common/protos/proto.d.ts` | TypeScript 类型定义（完整） |
-| `src/common/protos/proto.js` | Node.js 运行时实现（JSON 序列化） |
-| `src/common/protos/index.ts` | 统一导出 |
-| `src/common/protos/example.ts` | 使用示例 |
+| `src/protos/proto.d.ts` | TypeScript 类型定义（完整） |
+| `src/protos/proto.js` | Node.js 运行时实现（JSON 序列化） |
+| `src/protos/index.ts` | 统一导出 |
+| `src/protos/example.ts` | 使用示例 |
 
 ### 3. 业务集成
 
@@ -141,12 +141,12 @@ npm run build:proto
 ```
 
 这会生成：
-- `src/common/protos/proto.js` - 替换当前的 JSON 实现
-- `src/common/protos/proto.d.ts` - 类型定义
+- `src/protos/proto.js` - 替换当前的 JSON 实现
+- `src/protos/proto.d.ts` - 类型定义
 
 ### 3. 验证 Lua 描述文件
 
-确保 `dist/lua/common/protos/*.desc` 文件存在，供 lua-protobuf 加载。
+确保 `dist/lua/protos/*.desc` 文件存在，供 lua-protobuf 加载。
 
 ## 注意事项
 
@@ -155,7 +155,7 @@ npm run build:proto
 确保两端使用相同的 `MessageId` 定义：
 
 ```typescript
-// src/common/protos/proto.js
+// src/protos/proto.js
 const MessageId = {
   LOGIN_REQ: 200,
   LOGIN_RESP: 201,

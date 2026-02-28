@@ -85,30 +85,58 @@ TS-Skynet Hybrid 是一个创新的游戏服务端开发框架，解决了以下
 
 ```
 tslua/
-├── src/                          # TypeScript 源码
-│   ├── core/
-│   │   └── interfaces.ts         # 核心抽象接口层
-│   ├── runtime/
-│   │   ├── node-adapter.ts       # Node.js 运行时适配器
-│   │   ├── skynet-adapter.ts     # Skynet 运行时适配器
-│   │   └── async-bridge.ts       # 异步模型转换层
-│   ├── examples/
-│   │   └── login-service.ts      # 业务示例: 登录服务
-│   ├── main.ts                   # Skynet 入口
-│   └── main-node.ts              # Node.js 入口
+├── protocols/                  # Proto 协议定义（前后端共用）
+│   ├── proto/                  # .proto 源文件
+│   │   ├── common.proto
+│   │   ├── login.proto
+│   │   ├── game.proto
+│   │   ├── gateway.proto
+│   │   └── message_id.proto
+│   ├── scripts/                # 协议编译脚本
+│   │   └── build_proto.ts
+│   ├── package.json            # 独立的 npm 包
+│   └── README.md               # 协议规范文档
 │
-├── dist/                         # 编译输出
-│   ├── lua/                      # TSTL 编译的 Lua 代码
-│   └── nodejs/                   # TSC 编译的 JS 代码
+├── tables/                     # Luban 配置表（策划、客户端、后端共用）
+│   ├── datas/                  # Excel 数据文件
+│   ├── defines/                # XML 定义文件
+│   └── luban.conf              # Luban 配置文件
 │
-├── skynet/                       # Skynet 框架 (git submodule)
-│   ├── service-ts/               # 编译后的 TS->Lua 服务
-│   └── ...                       # Skynet 原有文件
+├── server/                     # 后端专属代码
+│   ├── src/                    # TypeScript 源码
+│   │   ├── app/                # 业务服务层
+│   │   │   ├── services/       # 具体服务实现
+│   │   │   │   ├── login/      # 登录服务
+│   │   │   │   ├── gateway/    # 网关服务
+│   │   │   │   └── game/       # 游戏服务
+│   │   │   └── main.ts         # Skynet 入口
+│   │   │
+│   │   ├── common/             # 共用模块
+│   │   │   └── protos/         # Protocol Buffers 协议定义 (生成)
+│   │   │
+│   │   └── framework/          # 框架核心
+│   │       ├── core/           # 核心抽象接口 (interfaces.ts)
+│   │       └── runtime/        # 运行时适配器
+│   │
+│   ├── config/                 # TypeScript 配置
+│   │   ├── tsconfig.json       # Node.js 配置
+│   │   └── tsconfig.lua.json   # TSTL 编译配置
+│   │
+│   ├── dist/                   # 编译输出
+│   │   ├── lua/                # TSTL 编译的 Lua 代码
+│   │   └── nodejs/             # TSC 编译的 JS 代码
+│   │
+│   ├── scripts/                # 构建脚本
+│   ├── tools/                  # 工具 (Luban 等)
+│   ├── package.json
+│   └── start.sh
 │
-├── tsconfig.json                 # Node.js TypeScript 配置
-├── tsconfig.tstl.json            # TSTL 编译配置
-├── package.json
-└── build.sh                      # 构建脚本
+├── skynet/                     # Skynet 框架 (git submodule)
+│   └── ...
+│
+├── docs/                       # 文档
+├── package.json                # 根目录入口 (转发命令到 server/)
+└── start.sh                    # 快速启动入口
 ```
 
 ---

@@ -28,7 +28,7 @@ tslua/
 │       ├── __beans__.xlsx    # Bean 定义
 │       ├── __enums__.xlsx    # 枚举定义
 │       └── item/             # 具体数据表
-└── src/common/tables/        # 生成的代码（构建产物）
+└── src/tables/        # 生成的代码（构建产物）
     ├── cfg.lua               # Lua 代码
     └── data/                 # JSON 数据
 ```
@@ -192,7 +192,7 @@ A:
 | Luban DLL | `tools/luban/Luban/` | Luban 执行文件 |
 | 配置定义 | `config/tables/defines/` | XML 格式表定义 |
 | 配置数据 | `config/tables/datas/` | Excel 数据文件 |
-| 生成代码 | `src/common/tables/` | 构建产物，不要手动修改 |
+| 生成代码 | `src/tables/` | 构建产物，不要手动修改 |
 
 **已删除的不必要文件：**
 - luban-4.5.0/ 源码目录
