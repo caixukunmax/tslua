@@ -18,7 +18,7 @@
 #### 1. 构建 Proto 响应
 
 ```typescript
-import { MessageId, proto } from '../../../common/protos';
+import { MessageId, proto } from '../../../protos';
 
 function buildProtoLoginResponse(response: LoginResponse): proto.login.LoginResponse {
   return proto.login.LoginResponse.create({
@@ -64,7 +64,7 @@ case 'login': {
 
 ```typescript
 // src/app/services/login/types.ts
-import { proto } from '../../../common/protos';
+import { proto } from '../../../protos';
 
 // 导出 proto 类型供业务使用
 export type ProtoLoginRequest = proto.login.LoginRequest;
@@ -136,7 +136,7 @@ case 'getPlayerInfo': {
 
 ```typescript
 // src/app/services/game/types.ts
-import { proto } from '../../../common/protos';
+import { proto } from '../../../protos';
 
 export type ProtoEnterGameRequest = proto.game.EnterGameRequest;
 export type ProtoEnterGameResponse = proto.game.EnterGameResponse;
@@ -326,7 +326,7 @@ async function handleClientLogin(packetData: Uint8Array): Promise<void> {
 ### 使用 MessageId 进行消息路由
 
 ```typescript
-import { MessageId, proto } from '../../../common/protos';
+import { MessageId, proto } from '../../../protos';
 
 // 消息处理器映射
 const messageHandlers: Record<number, (msg: any) => Promise<any>> = {

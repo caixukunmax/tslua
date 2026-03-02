@@ -89,7 +89,7 @@ protocols/
 ### TypeScript 中使用
 
 ```typescript
-import { proto, MessageId, MessageTypes } from '@/common/protos';
+import { proto, MessageId, MessageTypes } from '@/protos';
 
 // 创建消息
 const loginReq = proto.login.LoginRequest.create({

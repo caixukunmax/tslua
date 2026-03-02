@@ -14,9 +14,9 @@ coverage/
 .nyc_output/
 
 # Protocol Buffers 生成文件
-server/src/common/protos/proto.js
-server/src/common/protos/proto.d.ts
-server/src/common/protos/index.ts
+server/src/protos/proto.js
+server/src/protos/proto.d.ts
+server/src/protos/index.ts
 *.desc
 
 # Luban 生成文件

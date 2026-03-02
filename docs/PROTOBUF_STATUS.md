@@ -74,7 +74,7 @@ cd skynet && ./skynet examples/config
 
 ```typescript
 import { runtime } from '../../../framework/core/interfaces';
-import { MessageId, proto } from '../../../common/protos';
+import { MessageId, proto } from '../../../protos';
 
 // 创建消息
 const request = proto.login.LoginRequest.create({

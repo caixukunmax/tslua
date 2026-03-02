@@ -40,10 +40,10 @@
 
 ### 1. 定义协议
 
-编辑 `common/protos/*.proto` 文件：
+编辑 `protos/proto/*.proto` 文件：
 
 ```protobuf
-// common/protos/login.proto
+// protos/proto/login.proto
 syntax = "proto3";
 package login;
 
@@ -78,7 +78,7 @@ npm run build:proto
 ```typescript
 // src/app/services/login/index.ts
 import { runtime } from '../../../framework/core/interfaces';
-import { MessageId, proto } from '../../../common/protos';
+import { MessageId, proto } from '../../../protos';
 
 async function handleLogin(request: LoginRequest): Promise<void> {
   // 执行业务逻辑
@@ -262,7 +262,7 @@ if (runtime.codec) {
 
 ```typescript
 import { runtime } from '../../../framework/core/interfaces';
-import { MessageId, proto } from '../../../common/protos';
+import { MessageId, proto } from '../../../protos';
 
 async function sendLoginRequest(username: string, password: string): Promise<void> {
   // 创建请求
@@ -317,7 +317,7 @@ runtime.network.dispatch('lua', async (session, source, ...args) => {
 
 ### 添加新消息
 
-1. 编辑 `common/protos/*.proto` 添加消息定义
+1. 编辑 `protos/proto/*.proto` 添加消息定义
 2. 更新 `src/protos/proto.d.ts` 添加类型
 3. 更新 `src/protos/proto.js` 添加实现
 4. 更新 `MessageId` 和 `MessageTypes` 映射
