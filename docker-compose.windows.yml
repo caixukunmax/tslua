@@ -1,0 +1,23 @@
+# =============================================================================
+# Windows Docker Compose 覆盖配置
+# 解决 Windows 路径和权限问题
+# 使用方法: docker-compose -f docker-compose.yml -f docker-compose.windows.yml up
+# =============================================================================
+
+services:
+  skynet-dev:
+    # Windows 下使用 WSL2 后端，路径映射自动处理
+    # 如果路径映射有问题，可以改用绝对路径
+    volumes:
+      # Windows 路径格式（Docker Desktop 会自动转换）
+      - ./server/config/skynet:/skynet-config:ro
+      - ./server/dist/lua:/skynet/service-ts
+      # 具名卷避免权限问题
+      - skynet-logs:/skynet/logs
+    # Windows 下容器可能需要更多权限
+    privileged: false
+
+  skynet:
+    volumes:
+      - ./server/config/skynet:/skynet-config:ro
+      - skynet-logs:/skynet/logs

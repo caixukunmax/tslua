@@ -17,7 +17,16 @@
     "server:start": "cd server && npm run server:start",
     "server:stop": "cd server && npm run server:stop",
     "server:restart": "cd server && npm run server:restart",
-    "setup": "cd server && npm run setup"
+    "setup": "cd server && npm run setup",
+    "docker:setup": "powershell -ExecutionPolicy Bypass -File .\docker-deploy.ps1 setup",
+    "docker:build": "powershell -ExecutionPolicy Bypass -File .\docker-deploy.ps1 build",
+    "docker:dev": "powershell -ExecutionPolicy Bypass -File .\docker-deploy.ps1 dev",
+    "docker:start": "powershell -ExecutionPolicy Bypass -File .\docker-deploy.ps1 start",
+    "docker:stop": "powershell -ExecutionPolicy Bypass -File .\docker-deploy.ps1 stop",
+    "docker:status": "powershell -ExecutionPolicy Bypass -File .\docker-deploy.ps1 status",
+    "docker:logs": "powershell -ExecutionPolicy Bypass -File .\docker-deploy.ps1 logs",
+    "docker:deploy": "powershell -ExecutionPolicy Bypass -File .\docker-deploy.ps1 deploy",
+    "docker:shell": "powershell -ExecutionPolicy Bypass -File .\docker-deploy.ps1 shell"
   },
   "keywords": [
     "typescript",

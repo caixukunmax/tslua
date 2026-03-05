@@ -184,30 +184,45 @@ npm run dev
 
 #### Docker 生产环境运行
 
-1. 构建 Skynet 镜像 (首次需要):
+**Linux/macOS:**
 ```bash
+# 构建镜像
 docker-compose build skynet
-```
 
-2. 编译 TypeScript:
-```bash
+# 编译 TypeScript
 npm run build:ts
-```
 
-3. 启动服务:
-```bash
+# 启动服务
 docker-compose up -d skynet
-```
 
-4. 查看日志:
-```bash
+# 查看日志
 docker-compose logs -f skynet
-```
 
-5. 停止服务:
-```bash
+# 停止服务
 docker-compose down
 ```
+
+**Windows (PowerShell):**
+```powershell
+# 首次初始化
+.\docker-deploy.ps1 setup
+
+# 开发模式（推荐，代码实时生效）
+.\docker-deploy.ps1 dev
+
+# 生产模式
+.\docker-deploy.ps1 build
+.\docker-deploy.ps1 start -Daemon
+
+# 查看状态/日志
+.\docker-deploy.ps1 status
+.\docker-deploy.ps1 logs
+
+# 停止
+.\docker-deploy.ps1 stop
+```
+
+详细 Windows 部署文档: [docs/WINDOWS_DOCKER.md](./docs/WINDOWS_DOCKER.md)
 
 ---
 
