@@ -1,143 +1,116 @@
-# Docker 部署指南
+# TS-Skynet Docker 部署目录
 
-本目录包含 TS-Skynet 项目的 Docker 部署配置，采用**双模式**架构：
-- **开发模式**：volume 挂载代码，实时生效
-- **生产模式**：代码嵌入镜像，自包含部署
+本目录包含完整的 Docker 部署环境，**独立成体系**，不依赖外部源码。
 
 ## 目录结构
 
 ```
 docker/
-├── skynet/                 # Skynet 框架源码（git submodule）
-│   ├── skynet              #    纯净原生，零修改
-│   ├── lualib/
-│   └── service/
-│
-├── skynet-runtime/
-│   ├── Dockerfile          # 镜像构建配置
-│   └── config.tslua        # 默认配置文件
-│
-└── service-ts/             # 编译好的 Lua 代码（生产模式使用）
-    └── app/
-        └── main.lua
+├── compose.yml              # Docker Compose 主配置
+├── compose.override.yml     # 开发环境覆盖配置（可选）
+├── .dockerignore            # Docker 构建忽略文件
+├── README.md                # 本文件
+├── config/                  # 运行时配置
+│   └── skynet/
+│       └── config.tslua     # Skynet 配置文件
+├── service-ts/              # Lua 服务代码（外部编译后 copy 至此）
+│   └── (编译后的 .lua 文件)
+├── cli/                     # 远程管理工具
+│   ├── index.js             # CLI 主程序
+│   ├── config.json          # 远程服务器配置
+│   └── README.md
+├── scripts/                 # 本地部署脚本
+│   ├── deploy.ps1           # PowerShell 部署脚本
+│   └── deploy.bat           # CMD 入口
+├── skynet/                  # Skynet 源码（git submodule）
+└── skynet-runtime/          # 运行时镜像 Dockerfile
+    └── Dockerfile
 ```
 
-## 双模式架构
+## 使用方式
 
-### 开发模式（skynet-dev）
+### 1. 准备 Lua 代码
 
-```
-┌─────────────────────────────────────────┐
-│  tslua-skynet-dev 容器                   │
-│                                         │
-│  /skynet/service-ts/ ← volume 挂载       │
-│  ./server/dist/lua:/skynet/service-ts   │
-│                                         │
-│  特点：代码修改后立即生效，无需重建镜像     │
-│  适用：本地开发调试                        │
-└─────────────────────────────────────────┘
-```
+从外部编译并 copy Lua 代码到本目录：
 
-### 生产模式（skynet）
-
-```
-┌─────────────────────────────────────────┐
-│  tslua-skynet 容器                       │
-│                                         │
-│  /skynet/service-ts/ ← 镜像内嵌          │
-│  COPY docker/service-ts/ /skynet/...    │
-│                                         │
-│  特点：镜像自包含，独立部署                │
-│  适用：测试环境、生产环境                  │
-└─────────────────────────────────────────┘
-```
-
-## 快速开始
-
-### 开发模式
-
-```bash
-# 1. 编译 TypeScript
-cd server
+```powershell
+# 在项目根目录编译
 npm run build:ts
 
-# 2. 启动开发容器（代码挂载模式）
-cd ..
-docker-compose --profile dev up -d skynet-dev
+# Copy Lua 代码到 docker/service-ts/
+npm run docker:copy
+```
 
-# 3. 修改代码后重新编译，容器自动生效
+### 2. 本地 Docker 部署（Windows + WSL2）
+
+```powershell
+cd docker
+
+# 查看帮助
+.\scripts\deploy.ps1 -Help
+
+# 开发模式（volume 挂载，代码实时生效）
+.\scripts\deploy.ps1 dev
+
+# 生产模式（代码嵌入镜像）
+.\scripts\deploy.ps1 build
+.\scripts\deploy.ps1 start
+
+# 查看状态/日志
+.\scripts\deploy.ps1 status
+.\scripts\deploy.ps1 logs
+```
+
+### 3. 远程服务器部署
+
+使用 CLI 工具管理远程 Docker：
+
+```powershell
+# 配置远程服务器
+npm run docker:init
+# 编辑 docker/cli/config.json
+
+# 启动管理器
+npm run docker:manage
+```
+
+## 独立部署
+
+本目录可以独立打包部署到服务器：
+
+```bash
+# 1. 在开发机准备
 npm run build:ts
+npm run docker:copy
+
+# 2. 打包 docker/ 目录
+cd docker
+tar -czf tslua-docker.tar.gz .
+
+# 3. 上传到服务器并解压
+scp tslua-docker.tar.gz root@server:/opt/
+ssh root@server "cd /opt && tar -xzf tslua-docker.tar.gz"
+
+# 4. 在服务器启动
+ssh root@server "cd /opt/docker && docker compose up -d"
 ```
 
-### 生产模式
+## 配置说明
 
-```bash
-# 1. 编译 TypeScript 并复制到 docker/service-ts/
-cd server
-./scripts/build.sh docker
+### 本地开发（docker compose）
 
-# 2. 构建镜像（包含代码）
-cd ..
-docker-compose build skynet
+- `compose.yml` - 主配置，使用 volume 挂载
+- `config/skynet/` - Skynet 配置文件
+- `service-ts/` - Lua 代码（编译后 copy 进来）
 
-# 3. 启动生产容器
-docker-compose up -d skynet
+### 远程管理（docker/cli）
 
-# 4. 查看日志
-docker-compose logs -f skynet
-```
-
-## 常用命令
-
-| 命令 | 说明 |
-|------|------|
-| `./scripts/build.sh docker` | 编译并准备 Docker 构建上下文 |
-| `docker-compose build skynet` | 构建生产镜像 |
-| `docker-compose up -d skynet` | 启动生产容器 |
-| `docker-compose --profile dev up -d skynet-dev` | 启动开发容器 |
-| `docker-compose logs -f skynet` | 查看日志 |
-
-## 镜像构建流程
-
-```bash
-# 完整构建流程
-./scripts/build.sh docker     # 编译 TS → 复制到 docker/service-ts/
-docker-compose build skynet   # 构建镜像（Skynet + Lua代码 + 配置）
-docker-compose up -d skynet   # 启动容器
-```
-
-## 配置管理
-
-配置始终通过 volume 挂载，与代码分离：
-
-```yaml
-volumes:
-  - ./server/config/skynet:/skynet-config:ro
-environment:
-  - SKYNET_CONFIG=/skynet-config/config.tslua
-```
-
-支持多环境：
-- `config.tslua` - 默认配置
-- `config.prod.tslua` - 生产环境
-- `config.test.tslua` - 测试环境
-
-## CI/CD 集成
-
-```bash
-# 构建并推送镜像
-./scripts/build.sh docker
-docker-compose build skynet
-docker tag tslua-skynet your-registry/tslua-skynet:v1.0.0
-docker push your-registry/tslua-skynet:v1.0.0
-
-# 部署时只需拉取镜像和配置
-docker pull your-registry/tslua-skynet:v1.0.0
-docker-compose up -d skynet
-```
+- `cli/config.json` - 远程服务器 SSH 配置
+- 支持密钥/密码登录
+- 支持代码同步、日志查看、容器管理
 
 ## 注意事项
 
-1. **开发模式**：代码通过 volume 挂载，镜像内代码被覆盖
-2. **生产模式**：代码在镜像内，volume 只挂载配置
-3. **service-ts/.gitignore**：编译产物不提交，由 CI/CD 构建
+1. **service-ts/ 目录** - 需要手动 copy 编译后的 Lua 代码
+2. **config/skynet/** - 已包含默认配置，可根据需要修改
+3. **远程部署** - 需要先在服务器安装 Docker 和 Docker Compose

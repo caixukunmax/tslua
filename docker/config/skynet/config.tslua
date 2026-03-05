@@ -1,0 +1,52 @@
+-- =============================================================================
+-- Skynet Docker 配置文件
+-- 用于容器运行环境，与框架分离存放
+-- =============================================================================
+
+-- 线程数（可根据 CPU 核心数调整）
+thread = 8
+
+-- 启动模块
+bootstrap = "snlua bootstrap"
+
+-- 启动脚本（TS 编译后的 Lua 入口）
+-- 注意：main 是 TypeScript 入口文件 app/main.ts 编译后的 Lua 模块
+start = "app_main"
+
+-- Lua 服务路径
+-- 优先级：service-ts/ (TS编译代码) > service/ (原生服务)
+luaservice = "./service/?.lua;./service-ts/?.lua"
+lualoader = "./lualib/loader.lua"
+
+-- Lua 模块路径
+lua_path = "./lualib/?.lua;./lualib/?/init.lua;./service-ts/?.lua"
+lua_cpath = "./luaclib/?.so"
+
+-- C 服务路径
+cpath = "./cservice/?.so"
+
+-- 单节点模式（不开启集群）
+harbor = 0
+
+-- 日志配置
+-- Docker 环境下推荐输出到 stdout，方便 docker logs 查看
+logger = nil  -- nil 表示输出到 stdout
+
+-- 日志级别（可选: debug/info/warn/error）
+-- loglevel = "info"
+
+-- 守护进程（Docker 中必须关闭）
+daemon = nil
+
+-- =============================================================================
+-- 自定义配置（可选）
+-- =============================================================================
+
+-- 游戏服务端口（如需对外暴露）
+-- game_port = 8888
+
+-- 内部调试端口
+-- debug_port = 9999
+
+-- 工作目录（容器内固定为 /skynet）
+-- root = "/skynet"

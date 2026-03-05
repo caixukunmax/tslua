@@ -1,6 +1,6 @@
 # =============================================================================
 # TS-Skynet Docker Compose 配置
-# 支持开发模式（volume 挂载）和生产模式（镜像内嵌）
+# 独立部署配置 - 所有资源都在 docker/ 目录内
 # =============================================================================
 
 services:
@@ -10,7 +10,7 @@ services:
   # ---------------------------------------------------------------------------
   skynet-dev:
     build:
-      context: .
+      context: ..
       dockerfile: ./docker/skynet-runtime/Dockerfile
     container_name: tslua-skynet-dev
     restart: unless-stopped
@@ -19,9 +19,9 @@ services:
       - "9999:9999"   # 调试/管理端口
     volumes:
       # 挂载配置文件
-      - ./server/config/skynet:/skynet-config:ro
-      # 挂载 TS 编译的服务代码（开发时实时生效）
-      - ./server/dist/lua:/skynet/service-ts:ro
+      - ./config/skynet:/skynet-config:ro
+      # 挂载 Lua 服务代码（外部编译后 copy 到 ./service-ts/）
+      - ./service-ts:/skynet/service-ts:ro
       # 日志持久化
       - skynet-logs:/skynet/logs
     environment:
@@ -31,7 +31,7 @@ services:
       - skynet-net
     working_dir: /skynet
     profiles:
-      - dev  # 默认不启动，需指定 --profile dev
+      - dev
 
   # ---------------------------------------------------------------------------
   # Skynet 运行时容器 - 生产模式
@@ -39,7 +39,7 @@ services:
   # ---------------------------------------------------------------------------
   skynet:
     build:
-      context: .
+      context: ..
       dockerfile: ./docker/skynet-runtime/Dockerfile
     container_name: tslua-skynet
     restart: unless-stopped
@@ -47,8 +47,7 @@ services:
       - "8888:8888"
       - "9999:9999"
     volumes:
-      # 只挂载配置和日志，代码在镜像内
-      - ./server/config/skynet:/skynet-config:ro
+      - ./config/skynet:/skynet-config:ro
       - skynet-logs:/skynet/logs
     environment:
       - TZ=Asia/Shanghai

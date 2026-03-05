@@ -37,7 +37,7 @@ const defaultConfig = {
     containerName: 'tslua-skynet',
     imageName: 'tslua-skynet-runtime',
     remoteLuaPath: '/skynet/service-ts',
-    localLuaPath: '../../server/dist/lua'
+    localLuaPath: '../service-ts'  // 相对于 cli 目录，或外部传入
   }
 };
 

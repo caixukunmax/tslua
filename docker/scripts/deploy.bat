@@ -18,11 +18,11 @@ if "%~1"=="--help" goto :show_help
 if "%~1"=="help" goto :show_help
 
 :: 调用 PowerShell 脚本
-powershell -ExecutionPolicy Bypass -File "%~dp0docker-deploy.ps1" %*
+powershell -ExecutionPolicy Bypass -File "%~dp0deploy.ps1" %*
 goto :end
 
 :show_help
-echo 用法: docker-deploy.bat [命令] [选项]
+echo 用法: deploy.bat [命令] [选项]
 echo.
 echo 命令:
 echo   setup      初始化环境
@@ -50,7 +50,7 @@ echo   docker-deploy.bat start -Daemon
 echo   docker-deploy.bat status
 echo.
 echo 提示: 完整功能请使用 PowerShell 脚本
-echo   powershell -ExecutionPolicy Bypass -File .\docker-deploy.ps1 -Help
+echo   powershell -ExecutionPolicy Bypass -File .\deploy.ps1 -Help
 echo.
 goto :end
 

@@ -18,8 +18,8 @@ param(
 # 配置
 # =============================================================================
 $PROJECT_NAME = "tslua"
-$COMPOSE_FILE = "docker-compose.yml"
-$COMPOSE_FILE_WIN = "docker-compose.windows.yml"
+$COMPOSE_FILE = "compose.yml"
+$COMPOSE_FILE_WIN = "compose.override.yml"
 $CONTAINER_NAME = "$PROJECT_NAME-skynet"
 $CONTAINER_DEV_NAME = "$PROJECT_NAME-skynet-dev"
 
@@ -43,7 +43,7 @@ function Show-Help {
 ║  要求: Windows 10/11 + Docker Desktop (WSL2 后端)                            ║
 ╚══════════════════════════════════════════════════════════════════════════════╝
 
-用法: .\docker-deploy.ps1 <命令> [选项]
+用法: .\deploy.ps1 <命令> [选项]
 
 命令:
     setup           初始化环境（检查依赖、创建目录）
@@ -84,8 +84,8 @@ function Show-Help {
     .\docker-deploy.ps1 logs
 
 文件路径说明:
-    Windows 路径: .\server\dist\lua\      → 容器: /skynet/service-ts/
-    Windows 路径: .\server\config\skynet\ → 容器: /skynet-config/
+    Windows 路径: .\service-ts\   → 容器: /skynet/service-ts/
+    Windows 路径: .\config\skynet\ → 容器: /skynet-config/
 
 故障排除:
     1. Docker Desktop 未启动 -> 启动 Docker Desktop
@@ -153,9 +153,8 @@ function Initialize-Environment {
     
     # 创建必要目录
     $dirs = @(
-        "server/dist/lua",
-        "server/logs",
-        "docker/service-ts"
+        "service-ts",
+        "logs"
     )
     
     foreach ($dir in $dirs) {
@@ -165,13 +164,7 @@ function Initialize-Environment {
         }
     }
     
-    # 检查 node_modules
-    if (-not (Test-Path "server/node_modules")) {
-        Write-Info "安装 npm 依赖..."
-        Set-Location server
-        npm install
-        Set-Location ..
-    }
+    # 注意：本项目已独立于源码，如需要编译请使用根目录 npm run build:ts
     
     Write-Success "环境初始化完成！"
 }
@@ -187,24 +180,18 @@ function Build-Image {
     # 确保有编译好的 Lua 代码（用于生产镜像）
     if (-not (Test-Path "server/dist/lua/*.lua")) {
         Write-Warn "未找到编译后的 Lua 代码"
-        Write-Info "请先编译: cd server && npm run build:ts"
-        
-        $response = Read-Host "是否现在编译? (y/n)"
-        if ($response -eq 'y') {
-            Set-Location server
-            npm run build:ts
-            Set-Location ..
-        } else {
-            exit 1
-        }
+        Write-Error "请先编译 TypeScript 到 Lua，并复制到 docker/service-ts/ 目录"
+        Write-Info "编译命令: cd .. && npm run build:ts"
+        Write-Info "复制命令: Copy-Item -Path server/dist/lua/* -Destination docker/service-ts/ -Recurse"
+        exit 1
     }
     
-    # 复制代码到 docker/service-ts/
-    Write-Info "复制 Lua 代码到 docker/service-ts/..."
-    if (Test-Path "docker/service-ts/*") {
-        Remove-Item -Path "docker/service-ts/*" -Recurse -Force
+    # 检查代码是否已复制到 service-ts/
+    Write-Info "检查 Lua 代码..."
+    if (-not (Test-Path "service-ts/*.lua")) {
+        Write-Warn "未找到 service-ts/ 目录下的 Lua 文件"
+        Write-Info "请确保已将编译后的 Lua 代码复制到 docker/service-ts/ 目录"
     }
-    Copy-Item -Path "server/dist/lua/*" -Destination "docker/service-ts/" -Recurse -Force
     
     # 构建镜像
     $buildArgs = @("compose", "-f", $COMPOSE_FILE, "build")
