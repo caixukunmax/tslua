@@ -9,7 +9,7 @@ import { ConnectionData } from './data';
 import { GatewayLogic } from './logic';
 import { MessageId, proto } from '../../../protos';
 import type { CommandName, ClientInfo, AnyMessage } from './types';
-import type { ProtoConnectResponse, ProtoHeartbeatResponse, ProtoLoginRequest } from '../../../protos';
+import type { ConnectResponse as ProtoConnectResponse, HeartbeatResponse as ProtoHeartbeatResponse, LoginRequest as ProtoLoginRequest } from '../../../protos';
 
 // 数据层：持久化状态，不热更
 const data = new ConnectionData();

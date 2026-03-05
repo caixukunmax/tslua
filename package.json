@@ -28,12 +28,12 @@
     "clean": "cd server && npm run clean",
     "docker:manage": "node docker/cli/index.js",
     "docker:init": "node docker/cli/index.js --init",
-    "docker:build": "cd docker && powershell -ExecutionPolicy Bypass -File .\scripts\deploy.ps1 build",
-    "docker:start": "cd docker && powershell -ExecutionPolicy Bypass -File .\scripts\deploy.ps1 start",
-    "docker:stop": "cd docker && powershell -ExecutionPolicy Bypass -File .\scripts\deploy.ps1 stop",
-    "docker:status": "cd docker && powershell -ExecutionPolicy Bypass -File .\scripts\deploy.ps1 status",
-    "docker:logs": "cd docker && powershell -ExecutionPolicy Bypass -File .\scripts\deploy.ps1 logs",
-    "docker:copy": "Copy-Item -Path server/dist/lua/* -Destination docker/lua/ -Recurse -Force"
+    "docker:build": "cd docker && powershell -ExecutionPolicy Bypass -File scripts/deploy.ps1 build",
+    "docker:start": "cd docker && powershell -ExecutionPolicy Bypass -File scripts/deploy.ps1 start",
+    "docker:stop": "cd docker && powershell -ExecutionPolicy Bypass -File scripts/deploy.ps1 stop",
+    "docker:status": "cd docker && powershell -ExecutionPolicy Bypass -File scripts/deploy.ps1 status",
+    "docker:logs": "cd docker && powershell -ExecutionPolicy Bypass -File scripts/deploy.ps1 logs",
+    "docker:copy": "node -e \"require('child_process').execSync('xcopy /E /I /Y server\\dist\\lua\\* docker\\lua\\', {stdio:'inherit'})\""
   },
   "keywords": [
     "typescript",

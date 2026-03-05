@@ -9,7 +9,7 @@ import { SessionData } from './data';
 import { LoginLogic } from './logic';
 import { MessageId, proto } from '../../../protos';
 import type { LoginRequest, LoginResponse, User } from './types';
-import type { ProtoLoginResponse } from '../../../protos';
+import type { LoginResponse as ProtoLoginResponse } from '../../../protos';
 
 // 数据层：持久化状态，不热更
 const data = new SessionData();
