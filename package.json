@@ -26,8 +26,8 @@
     "setup": "cd server && npm run setup",
     "quick": "cd server && npm run quick",
     "clean": "cd server && npm run clean",
-    "docker:manage": "node tools/docker-cli/index.js",
-    "docker:init": "node tools/docker-cli/index.js --init"
+    "docker:manage": "node docker/cli/index.js",
+    "docker:init": "node docker/cli/index.js --init"
   },
   "keywords": [
     "typescript",

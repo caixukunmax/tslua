@@ -42,13 +42,13 @@ npm run docker:init
 或
 
 ```bash
-cd tools/docker-cli
+cd docker/cli
 node index.js --init
 ```
 
 ### 2. 编辑配置
 
-编辑 `tools/docker-cli/config.json`：
+编辑 `docker/cli/config.json`：
 
 ```json
 {
