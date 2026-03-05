@@ -1,16 +1,25 @@
 # =============================================================================
 # Docker 构建忽略文件（docker/ 目录专用）
+# 构建上下文: docker/ 目录
 # =============================================================================
 
 # 开发环境
 .git
 .gitignore
 *.md
+docs/
+.claude/
 
-# Node.js
-node_modules/
+# CLI 工具（构建时不需要）
+cli/
 
-# 编译输出（通过 volume 挂载）
+# 部署脚本（构建时不需要）
+scripts/
+
+# 运行时配置（通过 volume 挂载）
+config/
+
+# Lua 代码（通过 volume 挂载或构建时 copy）
 service-ts/
 
 # 日志
@@ -27,6 +36,11 @@ logs/
 # 操作系统
 .DS_Store
 Thumbs.db
+
+# 测试文件
+test/
+tests/
+coverage/
 
 # 其他
 .env

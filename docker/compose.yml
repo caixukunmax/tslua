@@ -10,8 +10,8 @@ services:
   # ---------------------------------------------------------------------------
   skynet-dev:
     build:
-      context: ..
-      dockerfile: ./docker/skynet-runtime/Dockerfile
+      context: .
+      dockerfile: ./skynet-runtime/Dockerfile
     container_name: tslua-skynet-dev
     restart: unless-stopped
     ports:
@@ -39,8 +39,8 @@ services:
   # ---------------------------------------------------------------------------
   skynet:
     build:
-      context: ..
-      dockerfile: ./docker/skynet-runtime/Dockerfile
+      context: .
+      dockerfile: ./skynet-runtime/Dockerfile
     container_name: tslua-skynet
     restart: unless-stopped
     ports:
