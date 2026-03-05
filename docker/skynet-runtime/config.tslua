@@ -15,11 +15,11 @@ bootstrap = "snlua bootstrap"
 start = "app_main"
 
 -- Lua 服务路径
-luaservice = "./service/?.lua;./service-ts/?.lua"
+luaservice = "./service/?.lua;./lua/?.lua"
 lualoader = "./lualib/loader.lua"
 
 -- Lua 模块路径
-lua_path = "./lualib/?.lua;./lualib/?/init.lua;./service-ts/?.lua"
+lua_path = "./lualib/?.lua;./lualib/?/init.lua;./lua/?.lua"
 lua_cpath = "./luaclib/?.so"
 
 -- C 服务路径

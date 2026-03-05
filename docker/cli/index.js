@@ -28,7 +28,7 @@ const c = {
 const CONFIG_PATH = path.join(__dirname, 'config.json');
 const defaultConfig = {
   remote: {
-    host: '192.168.1.100',
+    host: '10.0.0.169',
     port: 22,
     username: 'root',
     privateKey: '~/.ssh/id_rsa',
@@ -36,8 +36,8 @@ const defaultConfig = {
   docker: {
     containerName: 'tslua-skynet',
     imageName: 'tslua-skynet-runtime',
-    remoteLuaPath: '/skynet/service-ts',
-    localLuaPath: '../service-ts'  // 相对于 cli 目录，或外部传入
+    remoteLuaPath: '/skynet/lua',
+    localLuaPath: '../lua'  // 相对于 cli 目录，或外部传入
   }
 };
 

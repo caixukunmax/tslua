@@ -20,8 +20,8 @@ services:
     volumes:
       # 挂载配置文件
       - ./config/skynet:/skynet-config:ro
-      # 挂载 Lua 服务代码（外部编译后 copy 到 ./service-ts/）
-      - ./service-ts:/skynet/service-ts:ro
+      # 挂载 Lua 服务代码（外部编译后 copy 到 ./lua/）
+      - ./lua:/skynet/lua:ro
       # 日志持久化
       - skynet-logs:/skynet/logs
     environment:

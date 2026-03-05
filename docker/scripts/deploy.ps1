@@ -84,7 +84,7 @@ function Show-Help {
     .\docker-deploy.ps1 logs
 
 文件路径说明:
-    Windows 路径: .\service-ts\   → 容器: /skynet/service-ts/
+    Windows 路径: .\lua\   → 容器: /skynet/lua/
     Windows 路径: .\config\skynet\ → 容器: /skynet-config/
 
 故障排除:
@@ -153,7 +153,7 @@ function Initialize-Environment {
     
     # 创建必要目录
     $dirs = @(
-        "service-ts",
+        "lua",
         "logs"
     )
     
@@ -180,17 +180,17 @@ function Build-Image {
     # 确保有编译好的 Lua 代码（用于生产镜像）
     if (-not (Test-Path "server/dist/lua/*.lua")) {
         Write-Warn "未找到编译后的 Lua 代码"
-        Write-Error "请先编译 TypeScript 到 Lua，并复制到 docker/service-ts/ 目录"
+        Write-Error "请先编译 TypeScript 到 Lua，并复制到 docker/lua/ 目录"
         Write-Info "编译命令: cd .. && npm run build:ts"
-        Write-Info "复制命令: Copy-Item -Path server/dist/lua/* -Destination docker/service-ts/ -Recurse"
+        Write-Info "复制命令: Copy-Item -Path server/dist/lua/* -Destination docker/lua/ -Recurse"
         exit 1
     }
     
-    # 检查代码是否已复制到 service-ts/
+    # 检查代码是否已复制到 lua/
     Write-Info "检查 Lua 代码..."
-    if (-not (Test-Path "service-ts/*.lua")) {
-        Write-Warn "未找到 service-ts/ 目录下的 Lua 文件"
-        Write-Info "请确保已将编译后的 Lua 代码复制到 docker/service-ts/ 目录"
+    if (-not (Test-Path "lua/*.lua")) {
+        Write-Warn "未找到 lua/ 目录下的 Lua 文件"
+        Write-Info "请确保已将编译后的 Lua 代码复制到 docker/lua/ 目录"
     }
     
     # 构建镜像
@@ -244,7 +244,7 @@ function Start-Development {
     param([switch]$Daemon)
     
     Write-Info "启动开发环境容器..."
-    Write-Info "代码路径: .\server\dist\lua → /skynet/service-ts/"
+    Write-Info "代码路径: .\server\dist\lua → /skynet/lua/"
     
     # 确保有编译好的代码
     if (-not (Test-Path "server/dist/lua/*.lua")) {
@@ -357,7 +357,7 @@ function Deploy-Code {
     # 但如果使用生产容器，需要手动复制
     if ($containerRunning -match $CONTAINER_NAME) {
         Write-Info "复制代码到生产容器..."
-        docker cp "server/dist/lua/." "${CONTAINER_NAME}:/skynet/service-ts/"
+        docker cp "server/dist/lua/." "${CONTAINER_NAME}:/skynet/lua/"
         Write-Success "代码已部署"
     } else {
         Write-Success "开发模式下代码自动同步，无需手动部署"

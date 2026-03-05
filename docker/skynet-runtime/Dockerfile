@@ -46,7 +46,7 @@ COPY --from=builder /build/cservice /skynet/cservice
 COPY --from=builder /build/luaclib /skynet/luaclib
 
 # 创建服务目录
-RUN mkdir -p /skynet/service-ts /skynet/logs \
+RUN mkdir -p /skynet/lua /skynet/logs \
     && chown -R skynet:skynet /skynet
 
 # 复制默认配置文件（保底配置，确保镜像能独立运行）
@@ -55,7 +55,7 @@ COPY config.tslua /skynet/config.tslua
 
 # 复制编译好的 Lua 服务代码（生产模式）
 # 开发模式可通过 volume 挂载覆盖
-COPY service-ts/ /skynet/service-ts/
+COPY lua/ /skynet/lua/
 
 # 暴露端口（根据需要调整）
 EXPOSE 8888 9999

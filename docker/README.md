@@ -13,7 +13,7 @@ docker/
 ├── config/                  # 运行时配置
 │   └── skynet/
 │       └── config.tslua     # Skynet 配置文件
-├── service-ts/              # Lua 服务代码（外部编译后 copy 至此）
+├── lua/              # Lua 服务代码（外部编译后 copy 至此）
 │   └── (编译后的 .lua 文件)
 ├── cli/                     # 远程管理工具
 │   ├── index.js             # CLI 主程序
@@ -37,7 +37,7 @@ docker/
 # 在项目根目录编译
 npm run build:ts
 
-# Copy Lua 代码到 docker/service-ts/
+# Copy Lua 代码到 docker/lua/
 npm run docker:copy
 ```
 
@@ -101,7 +101,7 @@ ssh root@server "cd /opt/docker && docker compose up -d"
 
 - `compose.yml` - 主配置，使用 volume 挂载
 - `config/skynet/` - Skynet 配置文件
-- `service-ts/` - Lua 代码（编译后 copy 进来）
+- `lua/` - Lua 代码（编译后 copy 进来）
 
 ### 远程管理（docker/cli）
 
@@ -111,6 +111,6 @@ ssh root@server "cd /opt/docker && docker compose up -d"
 
 ## 注意事项
 
-1. **service-ts/ 目录** - 需要手动 copy 编译后的 Lua 代码
+1. **lua/ 目录** - 需要手动 copy 编译后的 Lua 代码
 2. **config/skynet/** - 已包含默认配置，可根据需要修改
 3. **远程部署** - 需要先在服务器安装 Docker 和 Docker Compose

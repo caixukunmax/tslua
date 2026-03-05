@@ -61,7 +61,7 @@ node index.js --init
   "docker": {
     "containerName": "tslua-skynet",
     "imageName": "tslua-skynet-runtime",
-    "remoteLuaPath": "/skynet/service-ts",
+    "remoteLuaPath": "/skynet/lua",
     "localLuaPath": "../../server/dist/lua"
   }
 }
