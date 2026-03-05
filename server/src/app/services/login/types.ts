@@ -53,7 +53,7 @@ export interface Session {
 }
 
 /**
- * 存储状态（用于热更新时的状态迁移）
+ * 存储状态（用于调试/监控）
  */
 export interface DataState {
   /** 用户会话列表 */
@@ -71,7 +71,6 @@ export interface CommandArgs {
   getUserInfo: [number]; // userId
   validateToken: [string]; // token
   getOnlineCount: [];
-  hotfix: [];
   get_state: [];
 }
 

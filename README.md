@@ -131,8 +131,9 @@ tslua/
 │   ├── package.json
 │   └── start.sh
 │
-├── skynet/                     # Skynet 框架 (git submodule)
-│   └── ...
+├── docker/
+│   ├── skynet/                 # Skynet 框架 (git submodule) - Docker 构建物料
+│   └── skynet-runtime/         # Docker 镜像配置
 │
 ├── docs/                       # 文档
 ├── package.json                # 根目录入口 (转发命令到 server/)
@@ -181,29 +182,31 @@ npm run dev
 [INFO] === Login Service Ready ===
 ```
 
-#### Skynet 环境运行
+#### Docker 生产环境运行
 
-1. 编译 Skynet (首次需要):
+1. 构建 Skynet 镜像 (首次需要):
 ```bash
-cd skynet
-make linux
+docker-compose build skynet
 ```
 
-2. 创建配置文件 `skynet/examples/config.ts`:
-```lua
-thread = 8
-harbor = 0
-start = "main"
-bootstrap = "snlua bootstrap"
-luaservice = "./service/?.lua;./service-ts/?.lua"
-lua_path = "./lualib/?.lua;./lualib/?/init.lua;./service-ts/?.lua"
-lua_cpath = "./luaclib/?.so"
+2. 编译 TypeScript:
+```bash
+npm run build:ts
 ```
 
-3. 运行:
+3. 启动服务:
 ```bash
-cd skynet
-./skynet examples/config.ts
+docker-compose up -d skynet
+```
+
+4. 查看日志:
+```bash
+docker-compose logs -f skynet
+```
+
+5. 停止服务:
+```bash
+docker-compose down
 ```
 
 ---

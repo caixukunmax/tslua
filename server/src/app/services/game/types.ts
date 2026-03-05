@@ -29,7 +29,7 @@ export interface PlayerUpdate {
 }
 
 /**
- * 存储状态（用于热更新时的状态迁移）
+ * 存储状态（用于调试/监控）
  */
 export interface DataState {
   /** 玩家列表 */
@@ -46,7 +46,6 @@ export interface CommandArgs {
   updatePlayer: [number, PlayerUpdate]; // userId, update
   getOnlineCount: [];
   getAllPlayers: [];
-  hotfix: [];
   get_state: [];
 }
 

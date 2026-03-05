@@ -1,0 +1,4 @@
+# 编译生成的 Lua 代码，不提交到 git
+*.lua
+*/
+!.gitignore

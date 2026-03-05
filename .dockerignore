@@ -1,0 +1,54 @@
+# =============================================================================
+# Docker 构建忽略文件
+# 优化构建上下文大小，加快镜像构建
+# =============================================================================
+
+# 开发环境文件
+.git
+.gitignore
+*.md
+docs/
+.claude/
+
+# Node.js 依赖（构建时安装）
+node_modules/
+server/node_modules/
+protocols/node_modules/
+tables/node_modules/
+
+# 编译输出（通过 volume 挂载）
+server/dist/
+protocols/dist/
+tables/dist/
+
+# Docker 目录下的 Skynet 源码需要在构建时使用
+# 但编译产物不需要
+!docker/skynet/
+docker/skynet/skynet
+docker/skynet/cservice/*.so
+docker/skynet/luaclib/*.so
+docker/skynet/*.d
+
+# 日志文件
+*.log
+logs/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# 操作系统
+.DS_Store
+Thumbs.db
+
+# 测试文件
+test/
+tests/
+coverage/
+
+# 其他
+.env
+.env.local

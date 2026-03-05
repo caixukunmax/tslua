@@ -98,13 +98,8 @@ cmd_hotfix() {
     fi
 
     info "热更新服务: $service"
-
-    # 检查服务器是否运行
-    local pid=$(find_pid)
-    if [ -z "$pid" ]; then
-        warn "服务器未运行，将只更新文件"
-    fi
-
+    warn "注意：热更新功能需要在 Docker 环境中实现"
+    
     # 编译
     if [ "$service" = "all" ]; then
         ./scripts/build.sh ts
@@ -112,24 +107,18 @@ cmd_hotfix() {
         ./scripts/build.sh ts:service "$service"
     fi
 
-    # 复制文件
-    mkdir -p "$BASE_DIR/skynet/service-ts"
-    cp -r "$BASE_DIR/dist/lua"/* "$BASE_DIR/skynet/service-ts/" 2>/dev/null || true
-
-    success "$service 热更新完成"
-
-    if [ -n "$pid" ]; then
-        info "服务文件已更新，建议手动触发热重载:"
-        echo "  方法1: 在服务控制台执行 'hotfix'"
-        echo "  方法2: 发送信号: kill -USR1 $pid"
-    fi
+    info "编译完成，请手动部署到 Docker 容器:"
+    echo "  ./scripts/build.sh deploy"
+    
+    success "$service 热更新文件准备完成"
 }
 
 # Node.js 模式运行
 cmd_node() {
     info "Node.js 模式启动 (开发调试)..."
     if ! command -v ts-node &> /dev/null; then
-        npm install -g ts-node
+        error "缺少 ts-node，请先安装: npm install -g ts-node"
+        exit 1
     fi
     ts-node src/app/bootstrap-node.ts
 }

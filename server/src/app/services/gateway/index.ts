@@ -92,19 +92,6 @@ async function handleCommand(cmd: string, args: unknown[]): Promise<void> {
       break;
     }
 
-    // 热更新命令
-    case 'hotfix': {
-      try {
-        await hotfixLogic();
-        runtime.network.ret(true, 'Hotfix success');
-      } catch (error) {
-        runtime.logger.error('Hotfix failed:', error);
-        runtime.network.ret(false, String(error));
-      }
-      break;
-    }
-
-    // 状态查询命令
     case 'get_state': {
       const state = data.exportState();
       runtime.network.ret(state);
@@ -115,30 +102,6 @@ async function handleCommand(cmd: string, args: unknown[]): Promise<void> {
       runtime.logger.warn(`Unknown command: ${cmd}`);
       runtime.network.ret(false, 'Unknown command');
   }
-}
-
-/**
- * 热更新逻辑层
- */
-async function hotfixLogic(): Promise<void> {
-  runtime.logger.info('=== Starting Logic Hotfix ===');
-
-  // 在 Lua 环境下清除模块缓存
-  // @ts-ignore
-  if (typeof _G !== 'undefined' && _G.package && _G.package.loaded) {
-    // @ts-ignore
-    _G.package.loaded['app.services.gateway.logic'] = null;
-    runtime.logger.info('Cleared Lua module cache');
-  }
-
-  // 重新导入逻辑层
-  // 注意：在 TS 环境下这个不会真正热更新，只在编译后的 Lua 环境下有效
-  const { GatewayLogic: NewLogic } = await import('./logic');
-  
-  // 替换逻辑层实例（保持数据层不变）
-  logic = new NewLogic(data);
-
-  runtime.logger.info('=== Logic Hotfix Complete ===');
 }
 
 /**

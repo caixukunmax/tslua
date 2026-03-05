@@ -1,0 +1,65 @@
+# =============================================================================
+# TS-Skynet Docker Compose 配置
+# 支持开发模式（volume 挂载）和生产模式（镜像内嵌）
+# =============================================================================
+
+services:
+  # ---------------------------------------------------------------------------
+  # Skynet 运行时容器 - 开发模式
+  # 使用 volume 挂载代码，修改后无需重建镜像
+  # ---------------------------------------------------------------------------
+  skynet-dev:
+    build:
+      context: .
+      dockerfile: ./docker/skynet-runtime/Dockerfile
+    container_name: tslua-skynet-dev
+    restart: unless-stopped
+    ports:
+      - "8888:8888"   # 游戏端口
+      - "9999:9999"   # 调试/管理端口
+    volumes:
+      # 挂载配置文件
+      - ./server/config/skynet:/skynet-config:ro
+      # 挂载 TS 编译的服务代码（开发时实时生效）
+      - ./server/dist/lua:/skynet/service-ts:ro
+      # 日志持久化
+      - skynet-logs:/skynet/logs
+    environment:
+      - TZ=Asia/Shanghai
+      - SKYNET_CONFIG=/skynet-config/config.tslua
+    networks:
+      - skynet-net
+    working_dir: /skynet
+    profiles:
+      - dev  # 默认不启动，需指定 --profile dev
+
+  # ---------------------------------------------------------------------------
+  # Skynet 运行时容器 - 生产模式
+  # 代码嵌入镜像，自包含部署
+  # ---------------------------------------------------------------------------
+  skynet:
+    build:
+      context: .
+      dockerfile: ./docker/skynet-runtime/Dockerfile
+    container_name: tslua-skynet
+    restart: unless-stopped
+    ports:
+      - "8888:8888"
+      - "9999:9999"
+    volumes:
+      # 只挂载配置和日志，代码在镜像内
+      - ./server/config/skynet:/skynet-config:ro
+      - skynet-logs:/skynet/logs
+    environment:
+      - TZ=Asia/Shanghai
+      - SKYNET_CONFIG=/skynet-config/config.tslua
+    networks:
+      - skynet-net
+    working_dir: /skynet
+
+networks:
+  skynet-net:
+    driver: bridge
+
+volumes:
+  skynet-logs:

@@ -115,7 +115,7 @@ export interface GameMessage extends Message {
 export type AnyMessage = HeartbeatMessage | ChatMessage | GameMessage | Message;
 
 /**
- * 存储状态（用于热更新时的状态迁移）
+ * 存储状态（用于调试/监控）
  */
 export interface DataState {
   /** 连接列表 */
@@ -135,7 +135,6 @@ export interface CommandArgs {
   online_count: [];
   broadcast: [AnyMessage];
   kick: [number, string?];
-  hotfix: [];
   get_state: [];
 }
 

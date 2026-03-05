@@ -1,0 +1,35 @@
+-- =============================================================================
+-- Skynet Docker 默认配置文件
+-- 此文件打包在镜像内，作为兜底配置
+-- 生产环境可通过 volume 挂载 /skynet-config/config.tslua 覆盖
+-- =============================================================================
+
+-- 线程数
+thread = 8
+
+-- 启动模块
+bootstrap = "snlua bootstrap"
+
+-- 启动脚本（TS 编译后的 Lua 入口）
+-- app/main.ts 编译后为 app_main.lua
+start = "app_main"
+
+-- Lua 服务路径
+luaservice = "./service/?.lua;./service-ts/?.lua"
+lualoader = "./lualib/loader.lua"
+
+-- Lua 模块路径
+lua_path = "./lualib/?.lua;./lualib/?/init.lua;./service-ts/?.lua"
+lua_cpath = "./luaclib/?.so"
+
+-- C 服务路径
+cpath = "./cservice/?.so"
+
+-- 单节点模式
+harbor = 0
+
+-- 日志输出到 stdout（Docker 推荐）
+logger = nil
+
+-- 守护进程关闭（Docker 必须）
+daemon = nil

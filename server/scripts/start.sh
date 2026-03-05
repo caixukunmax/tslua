@@ -55,84 +55,75 @@ show_menu() {
     echo ""
 }
 
-# 查找 PID
-find_pid() {
-    if [ -f "$BASE_DIR/logs/skynet.pid" ]; then
-        local pid=$(cat "$BASE_DIR/logs/skynet.pid" 2>/dev/null)
-        if [ -n "$pid" ] && kill -0 "$pid" 2>/dev/null; then echo "$pid"; return 0; fi
-    fi
-    local pid=$(pgrep -f "skynet.*config" | head -1)
-    if [ -n "$pid" ]; then echo "$pid"; return 0; fi
-    echo ""
+# 查找 Docker 容器状态
+find_container() {
+    local container=$(docker ps --format '{{.Names}}' | grep "^tslua-skynet$" || true)
+    echo "$container"
 }
 
 # 1. 一键启动
 cmd_quick_start() {
     echo -e "${BLUE}>>> 一键启动...${NC}"
     echo ""
-    # 检查 Skynet 是否已编译
-    if [ ! -f "$BASE_DIR/skynet/skynet" ]; then
-        echo -e "${YELLOW}Skynet 引擎未编译，正在编译...${NC}"
-        ./scripts/build.sh engine
-        echo ""
-    fi
     # 编译 TS→Lua
     ./scripts/build.sh ts
     echo ""
-    # 启动服务
-    ./scripts/server.sh start
+    # 启动 Docker 服务
+    cd "$BASE_DIR/../.."
+    docker-compose up -d skynet
+    echo -e "${GREEN}服务已启动，查看日志: docker-compose logs -f skynet${NC}"
 }
 
-# 2. 启动服务 (只启动，不构建)
+# 2. 启动 Docker 服务
 cmd_start() {
-    echo -e "${BLUE}>>> 启动 Skynet 服务...${NC}"
-    # 检查 Skynet 是否已编译
-    if [ ! -f "$BASE_DIR/skynet/skynet" ]; then
-        echo -e "${YELLOW}Skynet 引擎未编译，正在编译...${NC}"
-        ./scripts/build.sh engine
-        echo ""
-    fi
+    echo -e "${BLUE}>>> 启动 Skynet Docker 服务...${NC}"
     # 检查 Lua 文件是否存在
     if [ ! -d "$BASE_DIR/dist/lua" ]; then
         echo -e "${YELLOW}Lua 文件未编译，正在编译...${NC}"
         ./scripts/build.sh ts
         echo ""
     fi
-    ./scripts/server.sh start
+    cd "$BASE_DIR/../.."
+    docker-compose up -d skynet
+    echo -e "${GREEN}服务已启动${NC}"
 }
 
 # 3. 停止服务
 cmd_stop() {
-    echo -e "${BLUE}>>> 停止服务...${NC}"
-    ./scripts/server.sh stop
+    echo -e "${BLUE}>>> 停止 Docker 服务...${NC}"
+    cd "$BASE_DIR/../.."
+    docker-compose down
+    echo -e "${GREEN}服务已停止${NC}"
 }
 
 # 4. 重启服务
 cmd_restart() {
-    echo -e "${BLUE}>>> 重启服务...${NC}"
-    ./scripts/server.sh restart
+    echo -e "${BLUE}>>> 重启 Docker 服务...${NC}"
+    cd "$BASE_DIR/../.."
+    docker-compose restart skynet
+    echo -e "${GREEN}服务已重启${NC}"
 }
 
 # 5. 查看状态
 cmd_status() {
-    echo -e "${BLUE}>>> 服务器状态:${NC}"
-    ./scripts/server.sh status
+    echo -e "${BLUE}>>> Docker 服务状态:${NC}"
+    cd "$BASE_DIR/../.."
+    docker-compose ps skynet
 }
 
 # 6. 热更新服务
 cmd_hotfix() {
     echo -e "${BLUE}>>> 热更新服务${NC}"
-    echo "选择要热更新的服务:"
-    echo "  1) login (登录服务)"
-    echo "  2) gateway (网关服务)"
-    echo "  3) game (游戏服务)"
-    echo "  4) all (所有服务)"
+    echo "  1) 编译并部署 login 服务"
+    echo "  2) 编译并部署 gateway 服务"
+    echo "  3) 编译并部署 game 服务"
+    echo "  4) 编译并部署所有服务"
     read -p "请选择 [1-4]: " choice
     case $choice in
-        1) ./scripts/dev.sh hotfix login ;;
-        2) ./scripts/dev.sh hotfix gateway ;;
-        3) ./scripts/dev.sh hotfix game ;;
-        4) ./scripts/dev.sh hotfix all ;;
+        1|2|3|4) 
+            ./scripts/build.sh ts
+            ./scripts/build.sh deploy
+            ;;
         *) echo "无效选择" ;;
     esac
 }
@@ -175,9 +166,11 @@ cmd_clean() {
 
 # 后台启动
 cmd_daemon() {
-    echo -e "${BLUE}>>> 后台启动服务...${NC}"
-    ./scripts/server.sh start -d
+    echo -e "${BLUE}>>> 后台启动 Docker 服务...${NC}"
+    cd "$BASE_DIR/../.."
+    docker-compose up -d skynet
     echo -e "${GREEN}服务已在后台启动${NC}"
+    echo -e "查看日志: docker-compose logs -f skynet"
     read -p "按回车继续..."
 }
 
@@ -192,14 +185,9 @@ cmd_force_build() {
 
 # 查看日志
 cmd_logs() {
-    echo -e "${BLUE}>>> 最新日志 (最后 50 行):${NC}"
-    local latest_log=$(ls -t "$BASE_DIR/logs/"*.log 2>/dev/null | head -1)
-    if [ -n "$latest_log" ]; then
-        tail -50 "$latest_log"
-    else
-        echo "未找到日志文件"
-    fi
-    read -p "按回车继续..."
+    echo -e "${BLUE}>>> Docker 日志:${NC}"
+    cd "$BASE_DIR/../.."
+    docker-compose logs --tail=50 -f skynet
 }
 
 # 主循环
