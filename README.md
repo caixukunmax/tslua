@@ -14,30 +14,82 @@
 
 ## 🚀 快速开始
 
-### 一键启动（推荐）
-```bash
-./start.sh
-```
-然后选择 **1. 一键启动**
+### 方式一：跨平台 CLI（推荐）✨
 
-### 手动启动
-```bash
-# 1. 编译 TypeScript → Lua
-npm run build:ts
+**支持 Windows、Linux、macOS，命令完全一致**
 
-# 2. 启动 Skynet 服务
-./start.sh start
-```
-
-### 更多命令
 ```bash
-./start.sh help     # 查看所有命令
-./start.sh status   # 查看服务状态
-./start.sh stop     # 停止服务
-./start.sh logs     # 查看日志
+# 显示交互式菜单
+npm run menu
+
+# 或直接使用命令
+npm run quick       # 一键启动（自动检查 + 构建 + 启动）
+npm run cli -- status   # 查看状态
+npm run cli -- build:ts # 编译 TS→Lua
+npm run cli -- start    # 启动服务
+npm run cli -- stop     # 停止服务
+npm run cli -- logs     # 查看日志
 ```
 
-📖 详细文档：[docs/首次启动指南.md](docs/首次启动指南.md)
+### 方式二：直接运行入口脚本
+
+**Linux/macOS:**
+```bash
+./start.sh          # 交互式菜单
+./start.sh quick    # 一键启动
+```
+
+**Windows (PowerShell):**
+```powershell
+.\start.ps1         # 交互式菜单
+.\start.ps1 quick   # 一键启动
+```
+
+**Windows (CMD):**
+```cmd
+start.bat           # 交互式菜单
+start.bat quick     # 一键启动
+```
+
+> 注意：`start.sh`/`start.ps1`/`start.bat` 内部也是调用 CLI，只是提供了更便捷的入口
+
+### 常用命令速查
+
+| 命令 | 说明 |
+|------|------|
+| `npm run quick` | 一键启动（检查+编译+启动） |
+| `npm run dev` | Node.js 开发模式 |
+| `npm run build:ts` | 编译 TypeScript → Lua |
+| `npm run server:start` | 启动 Skynet 服务 |
+| `npm run server:stop` | 停止服务 |
+| `npm run server:status` | 查看状态 |
+| `npm run server:logs` | 查看日志 |
+| `npm run hotfix` | 热更新代码 |
+
+### CLI 完整命令列表
+
+```bash
+npm run cli -- help          # 查看帮助
+npm run cli -- quick         # 一键启动
+npm run cli -- start         # 启动服务
+npm run cli -- stop          # 停止服务
+npm run cli -- restart       # 重启服务
+npm run cli -- status        # 查看状态
+npm run cli -- logs          # 查看日志
+npm run cli -- build:ts      # 编译 TS→Lua
+npm run cli -- build:all     # 完整构建
+npm run cli -- build:clean   # 清理构建产物
+npm run cli -- dev           # Node.js 开发模式
+npm run cli -- setup         # 初始化环境
+npm run cli -- hotfix        # 热更新代码
+```
+
+📖 详细文档：
+- [docs/CLI_USAGE.md](docs/CLI_USAGE.md) - **跨平台 CLI 使用指南** ⭐
+- [docs/首次启动指南.md](docs/首次启动指南.md) 
+- [docs/WINDOWS_DOCKER.md](docs/WINDOWS_DOCKER.md) - Windows 详细部署指南
+
+> 💡 **提示**: 所有命令在 Windows、Linux、macOS 下完全一致！
 
 ---
 

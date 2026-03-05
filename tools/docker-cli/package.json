@@ -1,0 +1,14 @@
+{
+  "name": "tslua-docker-cli",
+  "version": "1.0.0",
+  "description": "TS-Skynet Docker 远程管理工具",
+  "main": "index.js",
+  "bin": {
+    "tslua-docker": "./index.js"
+  },
+  "scripts": {
+    "start": "node index.js",
+    "init": "node index.js --init"
+  },
+  "dependencies": {}
+}
