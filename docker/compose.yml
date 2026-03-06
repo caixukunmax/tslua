@@ -48,6 +48,7 @@ services:
       - "9999:9999"
     volumes:
       - ./config/skynet:/skynet-config:ro
+      - ./lua:/skynet/lua:ro  # 挂载 Lua 代码（开发时方便更新）
       - skynet-logs:/skynet/logs
     environment:
       - TZ=Asia/Shanghai

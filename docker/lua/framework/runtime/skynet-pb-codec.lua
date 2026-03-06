@@ -10,11 +10,18 @@ local TypeError = ____lualib.TypeError
 local URIError = ____lualib.URIError
 local __TS__New = ____lualib.__TS__New
 local __TS__SourceMapTraceBack = ____lualib.__TS__SourceMapTraceBack
-__TS__SourceMapTraceBack(debug.getinfo(1).short_src, {["15"] = 14,["16"] = 18,["17"] = 20,["19"] = 25,["20"] = 25,["21"] = 25,["22"] = 25,["23"] = 25,["24"] = 25,["25"] = 25,["26"] = 25,["27"] = 25,["28"] = 25,["29"] = 25,["30"] = 25,["31"] = 25,["32"] = 25,["33"] = 25,["34"] = 25,["35"] = 25,["36"] = 25,["37"] = 25,["38"] = 48,["39"] = 49,["40"] = 49,["41"] = 49,["42"] = 50,["44"] = 53,["45"] = 53,["46"] = 53,["48"] = 54,["49"] = 55,["50"] = 58,["51"] = 57,["52"] = 61,["53"] = 63,["54"] = 64,["55"] = 67,["56"] = 67,["57"] = 67,["58"] = 67,["59"] = 67,["60"] = 67,["61"] = 67,["62"] = 75,["63"] = 76,["64"] = 78,["65"] = 79,["66"] = 81,["67"] = 83,["68"] = 86,["69"] = 87,["70"] = 88,["72"] = 90,["75"] = 93,["78"] = 97,["79"] = 98,["80"] = 61,["81"] = 101,["82"] = 104,["83"] = 105,["85"] = 106,["89"] = 109,["90"] = 101,["91"] = 112,["92"] = 114,["93"] = 115,["95"] = 116,["99"] = 118,["100"] = 112,["101"] = 121,["102"] = 124,["103"] = 125,["104"] = 121,["105"] = 128,["106"] = 128,["107"] = 128,["109"] = 129,["110"] = 130,["111"] = 132,["112"] = 139,["113"] = 128,["114"] = 142,["115"] = 143,["116"] = 144,["117"] = 146,["119"] = 147,["120"] = 147,["121"] = 147,["122"] = 147,["126"] = 150,["127"] = 152,["128"] = 142});
+__TS__SourceMapTraceBack(debug.getinfo(1).short_src, {["15"] = 14,["16"] = 18,["17"] = 20,["18"] = 22,["19"] = 22,["20"] = 22,["21"] = 22,["22"] = 23,["23"] = 25,["26"] = 31,["27"] = 31,["28"] = 31,["29"] = 31,["30"] = 31,["31"] = 31,["32"] = 31,["33"] = 31,["34"] = 31,["35"] = 31,["36"] = 31,["37"] = 31,["38"] = 31,["39"] = 31,["40"] = 31,["41"] = 31,["42"] = 31,["43"] = 31,["44"] = 31,["45"] = 54,["46"] = 55,["47"] = 55,["48"] = 55,["49"] = 56,["51"] = 59,["52"] = 59,["53"] = 59,["55"] = 60,["56"] = 61,["57"] = 64,["58"] = 63,["59"] = 67,["60"] = 69,["61"] = 70,["64"] = 75,["65"] = 78,["66"] = 78,["67"] = 78,["68"] = 78,["69"] = 78,["70"] = 78,["71"] = 78,["72"] = 86,["73"] = 87,["74"] = 89,["75"] = 90,["76"] = 93,["77"] = 95,["78"] = 98,["79"] = 99,["80"] = 100,["82"] = 102,["85"] = 105,["88"] = 109,["89"] = 110,["90"] = 67,["91"] = 113,["92"] = 114,["94"] = 115,["98"] = 119,["99"] = 120,["101"] = 121,["105"] = 124,["106"] = 113,["107"] = 127,["108"] = 128,["110"] = 129,["114"] = 132,["115"] = 133,["117"] = 134,["121"] = 136,["122"] = 127,["123"] = 139,["124"] = 141,["125"] = 142,["126"] = 139,["127"] = 145,["128"] = 145,["129"] = 145,["131"] = 146,["133"] = 147,["137"] = 149,["138"] = 150,["139"] = 152,["140"] = 159,["141"] = 145,["142"] = 162,["143"] = 163,["145"] = 164,["149"] = 166,["150"] = 167,["151"] = 169,["153"] = 170,["154"] = 170,["155"] = 170,["156"] = 170,["160"] = 173,["161"] = 175,["162"] = 162});
 local ____exports = {}
 local skynet = _G.require("skynet")
-local pb = _G.require("pb")
-local protoc = _G.require("protoc")
+local pb
+local protoc
+local hasPb = _G.pcall(function()
+    pb = _G.require("pb")
+    protoc = _G.require("protoc")
+end)
+if not hasPb then
+    _G.print("[WARN] lua-protobuf not found, pb codec disabled")
+end
 --- 消息类型映射表
 local MSG_ID_TO_NAME = {
     [100] = "gateway.HeartbeatRequest",
@@ -50,8 +57,11 @@ function SkynetPbCodec.prototype.____constructor(self)
     self:initProto()
 end
 function SkynetPbCodec.prototype.initProto(self)
-    local skynetRoot = skynet.getenv("skynet_root") or "./skynet"
-    self.protoRoot = tostring(skynetRoot) .. "/service-ts/protos"
+    if not hasPb then
+        skynet.error("[SkynetPbCodec] Protobuf library not available, codec disabled")
+        return
+    end
+    self.protoRoot = "./lua/protos"
     local protoFiles = {
         "common_pb.desc",
         "login_pb.desc",
@@ -63,8 +73,8 @@ function SkynetPbCodec.prototype.initProto(self)
         local filepath = (self.protoRoot .. "/") .. file
         local f = _G.io.open(filepath, "rb")
         if f then
-            local data = f.read(_G, "*all")
-            f.close(_G)
+            local readFile = _G.load("local f = ...; local data = f:read(\"*all\"); f:close(); return data")
+            local data = readFile(f)
             local ok = pb.load(data)
             if ok then
                 skynet.error("[SkynetPbCodec] Loaded " .. file)
@@ -75,10 +85,16 @@ function SkynetPbCodec.prototype.initProto(self)
             skynet.error("[SkynetPbCodec] Proto file not found: " .. filepath)
         end
     end
-    self.initialized = true
+    self.initialized = hasPb
     skynet.error("[SkynetPbCodec] Initialized")
 end
 function SkynetPbCodec.prototype.encode(self, messageType, message)
+    if not hasPb then
+        error(
+            __TS__New(Error, "[SkynetPbCodec] Protobuf not available"),
+            0
+        )
+    end
     local encoded = pb.encode(messageType, message)
     if not encoded then
         error(
@@ -89,6 +105,12 @@ function SkynetPbCodec.prototype.encode(self, messageType, message)
     return encoded
 end
 function SkynetPbCodec.prototype.decode(self, messageType, data)
+    if not hasPb then
+        error(
+            __TS__New(Error, "[SkynetPbCodec] Protobuf not available"),
+            0
+        )
+    end
     local decoded = pb.decode(messageType, data)
     if not decoded then
         error(
@@ -106,12 +128,24 @@ function SkynetPbCodec.prototype.pack(self, msgId, messageType, message, session
     if session == nil then
         session = 0
     end
+    if not hasPb then
+        error(
+            __TS__New(Error, "[SkynetPbCodec] Protobuf not available"),
+            0
+        )
+    end
     local payload = self:encode(messageType, message)
     local timestamp = skynet.time()
     local packet = {msgId = msgId, session = session, data = payload, timestamp = timestamp}
     return self:encode("common.Packet", packet)
 end
 function SkynetPbCodec.prototype.unpack(self, data)
+    if not hasPb then
+        error(
+            __TS__New(Error, "[SkynetPbCodec] Protobuf not available"),
+            0
+        )
+    end
     local packet = self:decode("common.Packet", data)
     local messageType = MSG_ID_TO_NAME[packet.msgId]
     if not messageType then

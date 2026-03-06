@@ -105,22 +105,36 @@ async function handleCommand(cmd: string, args: unknown[]): Promise<void> {
 }
 
 // 启动服务
-runtime.service.start(async () => {
+// ⚠️ 注意：start 回调必须是同步函数（禁止 async）
+runtime.service.start(() => {
   runtime.logger.info('=== Game Service Starting ===');
   runtime.logger.info(`Service address: ${runtime.service.self()}`);
 
-  // 注册消息处理器
-  runtime.network.dispatch('lua', async (session: number, source: string, cmd: string, ...args: unknown[]) => {
+  // 注册消息处理器（handler 内部可以用 async）
+  runtime.network.dispatch('lua', (session: number, source: string, cmd: string, ...args: unknown[]) => {
     runtime.logger.debug(`Game received command: ${cmd} from ${source}`);
 
-    try {
-      await handleCommand(cmd, args);
-    } catch (error) {
-      runtime.logger.error(`Command ${cmd} failed:`, error);
-      runtime.network.ret(false, String(error));
-    }
+    // 使用 Promise 处理异步
+    Promise.resolve()
+      .then(() => handleCommand(cmd, args))
+      .then((result) => {
+        runtime.network.ret(result);
+      })
+      .catch((error) => {
+        runtime.logger.error(`Command ${cmd} failed:`, error);
+        runtime.network.ret(false, String(error));
+      });
   });
 
   runtime.logger.info('=== Game Service Ready ===');
   runtime.logger.info(`Online players: ${data.getCount()}`);
+
+  // 【必须】保持服务运行
+  const keepAlive = () => {
+    runtime.timer.sleep(30000).then(() => {
+      runtime.logger.debug(`[Game] Keep alive, players: ${data.getCount()}`);
+      keepAlive();
+    });
+  };
+  keepAlive();
 });

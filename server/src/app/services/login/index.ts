@@ -125,20 +125,25 @@ function startSessionCleaner(): void {
 }
 
 // 启动服务
-runtime.service.start(async () => {
+// ⚠️ 注意：start 回调必须是同步函数（禁止 async）
+runtime.service.start(() => {
   runtime.logger.info('=== Login Service Starting ===');
   runtime.logger.info(`Service address: ${runtime.service.self()}`);
 
-  // 注册消息处理器
-  runtime.network.dispatch('lua', async (session: number, source: string, cmd: string, ...args: unknown[]) => {
+  // 注册消息处理器（handler 内部可以用 async）
+  runtime.network.dispatch('lua', (session: number, source: string, cmd: string, ...args: unknown[]) => {
     runtime.logger.debug(`Login received command: ${cmd} from ${source}`);
 
-    try {
-      await handleCommand(cmd, args);
-    } catch (error) {
-      runtime.logger.error(`Command ${cmd} failed:`, error);
-      runtime.network.ret(false, undefined, String(error));
-    }
+    // 使用 Promise 处理异步
+    Promise.resolve()
+      .then(() => handleCommand(cmd, args))
+      .then((result) => {
+        runtime.network.ret(result);
+      })
+      .catch((error) => {
+        runtime.logger.error(`Command ${cmd} failed:`, error);
+        runtime.network.ret(false, undefined, String(error));
+      });
   });
 
   // 启动会话清理
@@ -146,4 +151,13 @@ runtime.service.start(async () => {
 
   runtime.logger.info('=== Login Service Ready ===');
   runtime.logger.info(`Sessions: ${data.getCount()}`);
+
+  // 【必须】保持服务运行
+  const keepAlive = () => {
+    runtime.timer.sleep(30000).then(() => {
+      runtime.logger.debug(`[Login] Keep alive, sessions: ${data.getCount()}`);
+      keepAlive();
+    });
+  };
+  keepAlive();
 });

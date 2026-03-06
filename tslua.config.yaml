@@ -1,0 +1,51 @@
+# =============================================================================
+# TS-Lua 项目配置文件
+# 支持自定义路径、构建选项、Docker 配置
+# =============================================================================
+
+# 项目基本信息
+name: tslua-project
+version: 1.0.0
+
+# 目录路径配置（相对于项目根目录）
+paths:
+  server: ./server      # TypeScript 源码目录
+  docker: ./docker      # Docker 配置目录
+  protocols: ./protocols # 协议定义目录
+  tables: ./tables      # 配置表目录
+
+# 构建设置
+build:
+  # TypeScript 编译输出目录
+  sourceDir: ./server/dist/lua
+  
+  # Lua 文件复制目标目录（用于 Docker 部署）
+  targetDir: ./docker/lua
+  
+  # 可选：Protobuf 生成路径
+  # protoOutput: ./server/src/common/protos
+  
+  # 可选：Luban 配置表生成路径
+  # tableOutput: ./server/src/common/tables
+
+# Docker 配置
+docker:
+  # Docker Compose 文件路径
+  composeFile: ./docker/compose.yml
+  
+  # 服务名称
+  serviceName: skynet
+  
+  # 容器名称
+  containerName: tslua-skynet
+  
+  # 可选：开发模式使用的覆盖配置
+  # composeOverride: ./docker/compose.override.yml
+
+# 钩子脚本（可选）
+# scripts:
+#   # 编译前执行
+#   beforeBuild: echo "Starting build..."
+#   
+#   # 编译后执行
+#   afterBuild: echo "Build complete!"

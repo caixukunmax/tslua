@@ -11,6 +11,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { spawn, execSync } from 'child_process';
 import * as readline from 'readline';
+import * as yaml from 'js-yaml';
 
 // 颜色输出（跨平台，不依赖外部包）
 const colors = {
@@ -37,12 +38,208 @@ const SCRIPT_DIR = __dirname;
 const SERVER_DIR = path.resolve(SCRIPT_DIR, '../..');
 const PROJECT_ROOT = path.resolve(SERVER_DIR, '..');
 
-// 工具函数
+// 工具函数（提前定义，供配置加载使用）
 function log(msg: string) { console.log(msg); }
 function info(msg: string) { console.log(c.cyan(`[INFO] ${msg}`)); }
 function success(msg: string) { console.log(c.green(`[SUCCESS] ${msg}`)); }
 function warn(msg: string) { console.log(c.yellow(`[WARN] ${msg}`)); }
 function error(msg: string) { console.error(c.red(`[ERROR] ${msg}`)); }
+
+// 配置文件管理
+interface Config {
+  name?: string;
+  version?: string;
+  paths?: {
+    server?: string;
+    docker?: string;
+    protocols?: string;
+    tables?: string;
+  };
+  build?: {
+    sourceDir?: string;
+    targetDir?: string;
+    protoOutput?: string;
+    tableOutput?: string;
+  };
+  docker?: {
+    composeFile?: string;
+    serviceName?: string;
+    containerName?: string;
+  };
+}
+
+// 默认配置
+function getDefaultConfig(): Config {
+  return {
+    paths: {
+      server: './server',
+      docker: './docker',
+      protocols: './protocols',
+      tables: './tables'
+    },
+    build: {
+      sourceDir: './server/dist/lua',
+      targetDir: './docker/lua'
+    },
+    docker: {
+      composeFile: './docker/compose.yml',
+      serviceName: 'skynet',
+      containerName: 'tslua-skynet'
+    }
+  };
+}
+
+// 解析命令行参数
+function parseArgs(): { configFile?: string; options: Record<string, string> } {
+  const args = process.argv.slice(2);
+  let configFile: string | undefined;
+  const options: Record<string, string> = {};
+  
+  for (let i = 0; i < args.length; i++) {
+    const arg = args[i];
+    
+    // --config=xxx 或 --config xxx 格式
+    if (arg === '--config' && i + 1 < args.length) {
+      configFile = args[++i];
+    } else if (arg.startsWith('--config=')) {
+      configFile = arg.slice(9);
+    }
+    // 其他 --key=value 参数
+    else if (arg.startsWith('--')) {
+      const eqIndex = arg.indexOf('=');
+      if (eqIndex > 2) {
+        const key = arg.slice(2, eqIndex);
+        const value = arg.slice(eqIndex + 1);
+        options[key] = value;
+      }
+    }
+  }
+  
+  return { configFile, options };
+}
+
+// 加载配置
+function loadConfig(explicitConfigFile?: string): Config {
+  const defaultConfig = getDefaultConfig();
+  
+  // 如果显式指定了配置文件，优先使用
+  if (explicitConfigFile) {
+    const configPath = path.isAbsolute(explicitConfigFile) 
+      ? explicitConfigFile 
+      : path.join(PROJECT_ROOT, explicitConfigFile);
+    
+    if (!fs.existsSync(configPath)) {
+      error(`指定的配置文件不存在: ${explicitConfigFile}`);
+      error(`完整路径: ${configPath}`);
+      process.exit(1);
+    }
+    
+    try {
+      const content = fs.readFileSync(configPath, 'utf-8');
+      const ext = path.extname(configPath).toLowerCase();
+      const isYaml = ext === '.yaml' || ext === '.yml';
+      const userConfig = isYaml ? yaml.load(content) : JSON.parse(content);
+      info(`已加载配置: ${explicitConfigFile}`);
+      return { ...defaultConfig, ...userConfig };
+    } catch (e) {
+      error(`配置文件解析失败: ${explicitConfigFile}`);
+      error(`错误: ${e}`);
+      process.exit(1);
+    }
+  }
+  
+  // 自动查找默认配置文件
+  const yamlPath = path.join(PROJECT_ROOT, 'tslua.config.yaml');
+  const ymlPath = path.join(PROJECT_ROOT, 'tslua.config.yml');
+  const jsonPath = path.join(PROJECT_ROOT, 'tslua.config.json');
+  
+  let configPath: string | null = null;
+  let configType: 'yaml' | 'json' | null = null;
+  
+  if (fs.existsSync(yamlPath)) {
+    configPath = yamlPath;
+    configType = 'yaml';
+  } else if (fs.existsSync(ymlPath)) {
+    configPath = ymlPath;
+    configType = 'yaml';
+  } else if (fs.existsSync(jsonPath)) {
+    configPath = jsonPath;
+    configType = 'json';
+  }
+  
+  if (configPath) {
+    try {
+      const content = fs.readFileSync(configPath, 'utf-8');
+      let userConfig: Config;
+      
+      if (configType === 'yaml') {
+        userConfig = yaml.load(content) as Config;
+      } else {
+        userConfig = JSON.parse(content);
+      }
+      
+      const fileName = path.basename(configPath);
+      info(`已加载配置: ${fileName}`);
+      return { ...defaultConfig, ...userConfig };
+    } catch (e) {
+      warn(`配置文件解析失败: ${configPath}`);
+      warn(`错误: ${e}`);
+      warn(`使用默认配置`);
+      return defaultConfig;
+    }
+  }
+  
+  return defaultConfig;
+}
+
+// 先解析命令行参数（提取 --config 和其他选项）
+const PARSED_ARGS = (() => {
+  const args = process.argv.slice(2);
+  let configFile: string | undefined = process.env.TSLUA_CONFIG;  // 支持环境变量
+  const options: Record<string, string> = {};
+  
+  for (let i = 0; i < args.length; i++) {
+    const arg = args[i];
+    
+    // --config=xxx 或 --config xxx 格式
+    if (arg === '--config' && i + 1 < args.length) {
+      configFile = args[++i];
+    } else if (arg.startsWith('--config=')) {
+      configFile = arg.slice(9);
+    }
+    // 其他 --key=value 参数
+    else if (arg.startsWith('--')) {
+      const eqIndex = arg.indexOf('=');
+      if (eqIndex > 2) {
+        const key = arg.slice(2, eqIndex);
+        const value = arg.slice(eqIndex + 1);
+        options[key] = value;
+      }
+    }
+  }
+  
+  return { configFile, options };
+})();
+
+// 加载配置（传入显式指定的配置文件路径）
+const CONFIG = loadConfig(PARSED_ARGS.configFile);
+
+// 获取路径（优先级: 命令行参数 > 配置文件 > 默认值）
+function getPath(key: keyof Config['paths'] | keyof Config['build'] | keyof Config['docker'], type: 'paths' | 'build' | 'docker'): string {
+  const cliKey = `${type}.${key}`;
+  if (PARSED_ARGS.options[cliKey]) {
+    return path.resolve(PROJECT_ROOT, PARSED_ARGS.options[cliKey]);
+  }
+  const configValue = CONFIG[type]?.[key as any];
+  return path.resolve(PROJECT_ROOT, configValue || '');
+}
+
+// 计算最终路径
+const SERVER_DIR_CFG = getPath('server', 'paths');
+const DOCKER_DIR = getPath('docker', 'paths');
+const SOURCE_LUA_DIR = getPath('sourceDir', 'build');
+const TARGET_LUA_DIR = getPath('targetDir', 'build');
+const COMPOSE_FILE = getPath('composeFile', 'docker');
 
 function exec(cmd: string, args: string[] = [], options: any = {}): Promise<number> {
   return new Promise((resolve) => {
@@ -77,6 +274,27 @@ function execOutput(cmd: string, options: any = {}): string {
 
 function exists(p: string): boolean {
   return fs.existsSync(p);
+}
+
+// 递归复制目录（跨平台）
+function copyDirSync(src: string, dest: string) {
+  // 确保目标目录存在
+  if (!fs.existsSync(dest)) {
+    fs.mkdirSync(dest, { recursive: true });
+  }
+  
+  const entries = fs.readdirSync(src, { withFileTypes: true });
+  
+  for (const entry of entries) {
+    const srcPath = path.join(src, entry.name);
+    const destPath = path.join(dest, entry.name);
+    
+    if (entry.isDirectory()) {
+      copyDirSync(srcPath, destPath);
+    } else {
+      fs.copyFileSync(srcPath, destPath);
+    }
+  }
 }
 
 // 命令实现
@@ -208,40 +426,60 @@ async function showMenu() {
 // 命令实现
 async function cmdQuickStart() {
   info('一键启动...');
-  await cmdBuildTS();
-  await exec('docker-compose', ['up', '-d', 'skynet'], { cwd: PROJECT_ROOT });
-  success('服务已启动');
-  info('查看日志: docker-compose logs -f skynet');
+  const buildSuccess = await cmdBuildTS();
+  if (!buildSuccess) {
+    error('编译失败，停止启动');
+    return;
+  }
+  const code = await exec('docker', ['compose', '-f', 'compose.yml', 'up', '-d', 'skynet'], { cwd: DOCKER_DIR });
+  if (code === 0) {
+    success('服务已启动');
+    info('查看日志: docker compose logs -f skynet');
+  } else {
+    error(`Docker 启动失败 (exit code: ${code})`);
+    info('可能原因：');
+    info('  1. Docker Desktop 未启动');
+    info('  2. 网络问题无法拉取镜像');
+    info('  3. 端口被占用');
+  }
 }
 
 async function cmdStart() {
   info('启动 Skynet Docker 服务...');
   if (!exists(path.join(SERVER_DIR, 'dist/lua'))) {
     warn('Lua 文件未编译，正在编译...');
-    await cmdBuildTS();
+    const buildSuccess = await cmdBuildTS();
+    if (!buildSuccess) {
+      error('编译失败，停止启动');
+      return;
+    }
   }
-  await exec('docker-compose', ['up', '-d', 'skynet'], { cwd: PROJECT_ROOT });
-  success('服务已启动');
+  const code = await exec('docker', ['compose', '-f', 'compose.yml', 'up', '-d', 'skynet'], { cwd: DOCKER_DIR });
+  if (code === 0) {
+    success('服务已启动');
+  } else {
+    error(`Docker 启动失败 (exit code: ${code})`);
+  }
 }
 
 async function cmdStop() {
   info('停止 Docker 服务...');
-  await exec('docker-compose', ['down'], { cwd: PROJECT_ROOT });
+  await exec('docker', ['compose', 'down'], { cwd: DOCKER_DIR });
   success('服务已停止');
 }
 
 async function cmdRestart() {
   info('重启 Docker 服务...');
-  await exec('docker-compose', ['restart', 'skynet'], { cwd: PROJECT_ROOT });
+  await exec('docker', ['compose', 'restart', 'skynet'], { cwd: DOCKER_DIR });
   success('服务已重启');
 }
 
 async function cmdStatus() {
   info('Docker 服务状态:');
-  await exec('docker-compose', ['ps', 'skynet'], { cwd: PROJECT_ROOT });
+  await exec('docker', ['compose', 'ps', 'skynet'], { cwd: DOCKER_DIR });
   
   log('\n容器状态:');
-  const output = execOutput('docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"', { cwd: PROJECT_ROOT });
+  const output = execOutput('docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"', { cwd: DOCKER_DIR });
   const lines = output.split('\n').filter(l => l.includes('tslua'));
   if (lines.length > 0) {
     lines.forEach(l => log(l));
@@ -252,20 +490,72 @@ async function cmdStatus() {
 
 async function cmdLogs() {
   info('查看日志 (按 Ctrl+C 退出)...');
-  await exec('docker-compose', ['logs', '--tail=50', '-f', 'skynet'], { cwd: PROJECT_ROOT });
+  await exec('docker', ['compose', 'logs', '--tail=50', '-f', 'skynet'], { cwd: DOCKER_DIR });
 }
 
-async function cmdBuildTS() {
+async function cmdBuildTS(): Promise<boolean> {
   info('编译 TypeScript → Lua...');
-  const tstlPath = path.join(SERVER_DIR, 'node_modules/.bin/tstl');
-  if (!exists(tstlPath) && !exists(tstlPath + '.cmd')) {
+  // 检查依赖（可能在根目录或 server 目录）
+  const rootTstlPath = path.join(PROJECT_ROOT, 'node_modules/.bin/tstl');
+  const serverTstlPath = path.join(SERVER_DIR_CFG, 'node_modules/.bin/tstl');
+  const hasTstl = exists(rootTstlPath) || exists(rootTstlPath + '.cmd') || 
+                  exists(serverTstlPath) || exists(serverTstlPath + '.cmd');
+  if (!hasTstl) {
     error('缺少依赖，请先安装: npm install');
+    return false;
+  }
+  
+  const code = await exec('npx', ['tstl', '--project', 'config/tsconfig.lua.json'], { cwd: SERVER_DIR_CFG });
+  if (code === 0) {
+    success('编译完成 → dist/lua/');
+    // 自动复制到 docker/lua/ 目录
+    await copyLuaToDocker();
+    return true;
+  } else {
+    error('编译失败');
+    return false;
+  }
+}
+
+async function copyLuaToDocker() {
+  info('复制 Lua 文件到 docker/lua/...');
+  const sourceDir = SOURCE_LUA_DIR;
+  const targetDir = TARGET_LUA_DIR;
+  
+  if (!exists(sourceDir)) {
+    warn('源目录不存在: dist/lua/');
     return;
   }
   
-  const code = await exec('npx', ['tstl', '--project', 'config/tsconfig.lua.json'], { cwd: SERVER_DIR });
-  if (code === 0) {
-    success('编译完成 → dist/lua/');
+  try {
+    // 清空目标目录（避免旧文件残留）
+    if (exists(targetDir)) {
+      fs.rmSync(targetDir, { recursive: true, force: true });
+    }
+    fs.mkdirSync(targetDir, { recursive: true });
+    
+    // 使用 Node.js 递归复制（跨平台）
+    copyDirSync(sourceDir, targetDir);
+    
+    // 统计文件数
+    const countFiles = (dir: string): number => {
+      let count = 0;
+      const entries = fs.readdirSync(dir, { withFileTypes: true });
+      for (const entry of entries) {
+        const fullPath = path.join(dir, entry.name);
+        if (entry.isDirectory()) {
+          count += countFiles(fullPath);
+        } else {
+          count++;
+        }
+      }
+      return count;
+    };
+    
+    const fileCount = countFiles(targetDir);
+    success(`已复制 ${fileCount} 个文件到 docker/lua/`);
+  } catch (e) {
+    warn(`复制失败: ${e}`);
   }
 }
 

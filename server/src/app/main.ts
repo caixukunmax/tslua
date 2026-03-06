@@ -76,11 +76,28 @@ async function startAllServices(): Promise<void> {
   rt.logger.info('========================================');
 }
 
-runtime.service.start(async () => {
-  try {
-    await startAllServices();
-  } catch (error) {
-    runtime.logger.error('Bootstrap failed:', error);
-    runtime.service.exit();
-  }
+// 启动服务
+// ⚠️ 注意：start 回调必须是同步函数（禁止 async）
+runtime.service.start(() => {
+  // 使用 Promise 链式调用替代 async/await
+  Promise.resolve()
+    .then(() => startAllServices())
+    .then(() => {
+      runtime.logger.info('========================================');
+      runtime.logger.info('    Bootstrap completed                 ');
+      runtime.logger.info('========================================');
+    })
+    .catch((error) => {
+      runtime.logger.error('Bootstrap failed:', error);
+      runtime.service.exit();
+    });
+  
+  // 【必须】保持主服务运行
+  const keepAlive = () => {
+    runtime.timer.sleep(60000).then(() => {
+      runtime.logger.debug('[Main] Keep alive');
+      keepAlive();
+    });
+  };
+  keepAlive();
 });

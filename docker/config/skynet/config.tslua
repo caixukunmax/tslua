@@ -10,8 +10,8 @@ thread = 8
 bootstrap = "snlua bootstrap"
 
 -- 启动脚本（TS 编译后的 Lua 入口）
--- 注意：main 是 TypeScript 入口文件 app/main.ts 编译后的 Lua 模块
-start = "app_main"
+-- 先执行 bootstrap-skynet 初始化运行时，它会自动加载 main
+start = "app/bootstrap-skynet"
 
 -- Lua 服务路径
 -- 优先级：lua/ (TS编译代码) > service/ (原生服务)

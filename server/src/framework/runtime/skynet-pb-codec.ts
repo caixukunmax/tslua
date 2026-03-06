@@ -13,11 +13,17 @@ import { IPbCodec } from '../core/interfaces';
 // @ts-ignore
 const skynet = _G.require('skynet');
 
-// 在 Lua 环境中动态加载 lua-protobuf
+// 在 Lua 环境中动态加载 lua-protobuf（可选）
 // @ts-ignore
-const pb = _G.require('pb');
+let pb: any;
 // @ts-ignore
-const protoc = _G.require('protoc');
+let protoc: any;
+// @ts-ignore
+const hasPb = _G.pcall(() => { pb = _G.require('pb'); protoc = _G.require('protoc'); });
+if (!hasPb) {
+    // @ts-ignore
+    _G.print('[WARN] lua-protobuf not found, pb codec disabled');
+}
 
 /**
  * 消息类型映射表
@@ -59,9 +65,14 @@ export class SkynetPbCodec implements IPbCodec {
   }
 
   private initProto(): void {
-    // 获取 Skynet 根目录
-    const skynetRoot = skynet.getenv('skynet_root') || './skynet';
-    this.protoRoot = `${skynetRoot}/service-ts/protos`;
+    // 如果没有 pb 库，跳过初始化
+    if (!hasPb) {
+      skynet.error('[SkynetPbCodec] Protobuf library not available, codec disabled');
+      return;
+    }
+
+    // 获取 proto 文件目录（相对于 Skynet 工作目录）
+    this.protoRoot = './lua/protos';
 
     // 加载所有 proto 描述文件
     const protoFiles = [
@@ -77,10 +88,11 @@ export class SkynetPbCodec implements IPbCodec {
       // @ts-ignore
       const f = _G.io.open(filepath, 'rb');
       if (f) {
+        // 使用 load 执行正确的 Lua 文件读取 (Lua 5.4)
         // @ts-ignore
-        const data = f.read(_G, '*all');
+        const readFile = _G.load('local f = ...; local data = f:read("*all"); f:close(); return data');
         // @ts-ignore
-        f.close(_G);
+        const data = readFile(f);
         
         // 加载到 pb
         const ok = pb.load(data);
@@ -94,11 +106,14 @@ export class SkynetPbCodec implements IPbCodec {
       }
     }
 
-    this.initialized = true;
+    this.initialized = hasPb;
     skynet.error('[SkynetPbCodec] Initialized');
   }
 
   encode(messageType: string, message: any): Uint8Array {
+    if (!hasPb) {
+      throw new Error('[SkynetPbCodec] Protobuf not available');
+    }
     // pb.encode 返回 Lua string，需要转换为 Uint8Array
     // @ts-ignore
     const encoded = pb.encode(messageType, message);
@@ -110,6 +125,9 @@ export class SkynetPbCodec implements IPbCodec {
   }
 
   decode(messageType: string, data: Uint8Array): any {
+    if (!hasPb) {
+      throw new Error('[SkynetPbCodec] Protobuf not available');
+    }
     // @ts-ignore
     const decoded = pb.decode(messageType, data);
     if (!decoded) {
@@ -120,12 +138,14 @@ export class SkynetPbCodec implements IPbCodec {
 
   create(messageType: string, init?: any): any {
     // lua-protobuf 没有 create 方法，直接返回 init 或空表
-    // @ts-ignore
     const result = init || {};
     return result;
   }
 
   pack(msgId: number, messageType: string, message: any, session: number = 0): Uint8Array {
+    if (!hasPb) {
+      throw new Error('[SkynetPbCodec] Protobuf not available');
+    }
     const payload = this.encode(messageType, message);
     const timestamp = skynet.time();
 
@@ -140,6 +160,9 @@ export class SkynetPbCodec implements IPbCodec {
   }
 
   unpack(data: Uint8Array): { msgId: number; messageType: string; message: any; session: number } {
+    if (!hasPb) {
+      throw new Error('[SkynetPbCodec] Protobuf not available');
+    }
     const packet = this.decode('common.Packet', data);
     const messageType = MSG_ID_TO_NAME[packet.msgId];
 

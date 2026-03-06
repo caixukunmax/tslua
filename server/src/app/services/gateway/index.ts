@@ -166,15 +166,18 @@ async function forwardToLogin(packetData: Uint8Array): Promise<void> {
 }
 
 // 启动服务
-runtime.service.start(async () => {
+// ⚠️ 注意：start 回调必须是同步函数（禁止 async）
+// 原因：Skynet 服务初始化需要同步完成，进入消息循环
+runtime.service.start(() => {
   runtime.logger.info('=== Gateway Service Starting ===');
   runtime.logger.info(`Service address: ${runtime.service.self()}`);
 
-  // 注册消息处理器
-  runtime.network.dispatch('lua', async (session: number, source: string, cmd: string, ...args: any[]) => {
+  // 注册消息处理器（handler 内部可以用 async）
+  runtime.network.dispatch('lua', (session: number, source: string, cmd: string, ...args: any[]) => {
     runtime.logger.debug(`Gateway received command: ${cmd} from ${source}`);
 
-    try {
+    // 使用 Promise 处理异步
+    Promise.resolve().then(async () => {
       // 特殊处理 protobuf 消息
       if (cmd === 'heartbeat' && args[0] instanceof Uint8Array) {
         await handleHeartbeat(args[0]);
@@ -183,12 +186,22 @@ runtime.service.start(async () => {
       } else {
         await handleCommand(cmd, args);
       }
-    } catch (error) {
+    }).catch((error) => {
       runtime.logger.error(`Command ${cmd} failed:`, error);
       runtime.network.ret(false, String(error));
-    }
+    });
   });
 
   runtime.logger.info('=== Gateway Service Ready ===');
   runtime.logger.info(`Connections: ${data.getCount()}`);
+
+  // 【重要】启动后台定时器保持服务运行
+  // Skynet 服务需要至少一个活跃的协程，否则会退出
+  const keepAlive = () => {
+    runtime.timer.sleep(30000).then(() => {
+      runtime.logger.debug(`[Gateway] Keep alive, connections: ${data.getCount()}`);
+      keepAlive();  // 递归保持循环
+    });
+  };
+  keepAlive();
 });
