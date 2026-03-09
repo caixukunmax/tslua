@@ -1077,9 +1077,48 @@ const CONTAINER_NAME = 'tslua-skynet';  // 容器名
 - 两者不完全兼容，可能导致 `cannot resume dead coroutine` 错误
 
 **已修复的部分**：
-- `runtime.timer.sleep()` 改用 `skynet.timeout` 而非 `skynet.sleep`
+- `runtime.timer.sleep()` 改用 `skynet.timeout` 而非 `skynet.sleep` ⚠️ **待商讨**
 - `runtime.service.start()` 使用 `skynet.fork` 包装回调
 - `runtime.network.dispatch()` 简化为直接调用
+
+**待商讨：sleep() 实现方案**
+
+当前使用 `skynet.timeout` 实现 `sleep()`，但这可能不是最优方案：
+
+```typescript
+// 当前实现（使用 skynet.timeout）
+sleep(ms: number): Promise<void> {
+  return new Promise<void>((resolve) => {
+    skynet.timeout(Math.floor(ms / 10), resolve);
+  });
+}
+
+// 替代方案1：使用 skynet.fork + skynet.sleep
+sleep(ms: number): Promise<void> {
+  return new Promise<void>((resolve) => {
+    skynet.fork(() => {
+      skynet.sleep(Math.floor(ms / 10));
+      resolve();
+    });
+  });
+}
+
+// 替代方案2：修改 lualib_bundle 中的 __TS__AsyncAwaiter
+// 让 TSTL Promise 使用 Skynet 协程
+```
+
+**各方案对比**：
+
+| 方案 | 优点 | 缺点 |
+|------|------|------|
+| `skynet.timeout` | 简单，不创建额外协程 | 无法取消，与 async/await 语义不完全一致 |
+| `skynet.fork + sleep` | 更接近原语义 | 创建额外协程，性能开销 |
+| 修改 `__TS__AsyncAwaiter` | 根本解决 | 改动大，可能影响其他功能 |
+
+**需要验证的问题**：
+1. `skynet.timeout` 在 async 函数中的行为是否正确？
+2. 是否需要支持 `clearTimeout`？
+3. 长时间 sleep 是否会影响消息处理？
 
 **剩余问题**：
 - 某些异步流程仍可能出现协程错误
