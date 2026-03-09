@@ -53,6 +53,35 @@ export class NodeTimer implements ITimer {
   now(): number {
     return Math.floor(Date.now() / 1000);
   }
+
+  /**
+   * 协程安全的 setTimeout（Node.js 环境下直接映射）
+   */
+  safeTimeout(callback: () => void | Promise<void>, ms?: number): void {
+    global.setTimeout(() => {
+      const result = callback();
+      // Node.js 不需要特殊处理 Promise
+      if (result && typeof (result as any).catch === 'function') {
+        (result as Promise<void>).catch((err) => {
+          console.error('[safeTimeout] Error:', err);
+        });
+      }
+    }, ms || 0);
+  }
+
+  /**
+   * 协程安全的 setImmediate（Node.js 环境下直接映射）
+   */
+  safeImmediate(callback: () => void | Promise<void>): void {
+    global.setImmediate(() => {
+      const result = callback();
+      if (result && typeof (result as any).catch === 'function') {
+        (result as Promise<void>).catch((err) => {
+          console.error('[safeImmediate] Error:', err);
+        });
+      }
+    });
+  }
 }
 
 /**

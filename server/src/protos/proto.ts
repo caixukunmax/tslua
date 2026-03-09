@@ -70,6 +70,7 @@ export interface ValidateTokenResponse {
   valid?: boolean;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export interface GetOnlineCountRequest {}
 
 export interface GetOnlineCountResponse {

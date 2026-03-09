@@ -75,7 +75,7 @@ export class SessionData {
    */
   updateActivity(userId: number, time: number): boolean {
     const session = this.sessions.get(userId);
-    if (session === undefined) {
+    if (session == null) {
       return false;
     }
     session.lastActivityTime = time;
@@ -117,10 +117,10 @@ export class SessionData {
    * 导入状态（用于热更新时的状态迁移）
    */
   importState(state: DataState): void {
-    if (state.sessions !== undefined) {
+    if (state.sessions != null) {
       this.sessions = new Map(state.sessions);
     }
-    if (state.nextUserId !== undefined) {
+    if (state.nextUserId != null) {
       this.nextUserId = state.nextUserId;
     }
   }

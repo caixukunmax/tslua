@@ -56,13 +56,13 @@ export class SkynetPromise<T> {
       if (this.state === 'fulfilled' && onFulfilled) {
         try {
           onFulfilled(this.value!);
-        } catch (error) {
+        } catch {
           // 忽略回调错误
         }
       } else if (this.state === 'rejected' && onRejected) {
         try {
           onRejected(this.error);
-        } catch (error) {
+        } catch {
           // 忽略回调错误
         }
       }
@@ -149,18 +149,19 @@ export class SkynetPromise<T> {
       }
 
       promises.forEach((promise, index) => {
-        (promise as any).then(
-          (value: T) => {
+        // 使用 async/await 替代 .then()，确保在协程管理下执行
+        (async () => {
+          try {
+            const value = await promise;
             results[index] = value;
             completed++;
             if (completed === promises.length) {
               resolve(results);
             }
-          },
-          (error: any) => {
+          } catch (error) {
             reject(error);
           }
-        );
+        })();
       });
     }) as any;
   }

@@ -7,7 +7,7 @@
 
 /** @noSelfInFile */
 
-// @ts-ignore
+// @ts-expect-error - require 是 Lua 全局函数
 const skynet = _G.require('skynet');
 
 import {
@@ -65,19 +65,51 @@ export class SkynetTimer implements ITimer {
     return centiseconds;
   }
 
-  clearTimeout(handle: any): void {
+  clearTimeout(_handle: any): void {
     // Skynet 不支持取消 timeout，这里留空
     // 实际使用中可以通过标志位来实现
   }
 
-  async sleep(ms: number): Promise<void> {
-    const centiseconds = Math.floor(ms / 10);
-    // skynet.sleep 会 yield 当前协程
-    skynet.sleep(centiseconds);
+  sleep(ms: number): Promise<void> {
+    // 使用 skynet.timeout 实现非阻塞等待
+    // 这会在 Skynet 事件循环中调度回调
+    return new Promise<void>((resolve) => {
+      const centiseconds = Math.floor(ms / 10);
+      skynet.timeout(centiseconds, () => {
+        resolve();
+      });
+    });
   }
 
   now(): number {
     return skynet.time();
+  }
+
+  /**
+   * 协程安全的 setTimeout
+   * 使用 skynet.fork 包装回调，确保在 Skynet 协程中执行
+   */
+  safeTimeout(callback: () => void | Promise<void>, ms?: number): void {
+    const centiseconds = Math.floor((ms || 0) / 10);
+    skynet.timeout(centiseconds, () => {
+      // skynet.fork 创建受管理的协程
+      (skynet as any).fork(() => {
+        const result = callback();
+        // 如果回调返回 Promise，等待完成
+        if (result && typeof (result as any).then === 'function') {
+          (result as Promise<void>).catch((err) => {
+            skynet.error(`[safeTimeout] Error: ${err}`);
+          });
+        }
+      });
+    });
+  }
+
+  /**
+   * 协程安全的 setImmediate
+   */
+  safeImmediate(callback: () => void | Promise<void>): void {
+    this.safeTimeout(callback, 0);
   }
 }
 
@@ -98,13 +130,11 @@ export class SkynetNetwork implements INetwork {
 
   dispatch(messageType: string, handler: (session: number, source: string, ...args: any[]) => void | Promise<void>): void {
     skynet.dispatch(messageType, (session: number, source: number, ...args: any[]) => {
-      // 如果 handler 返回 Promise（在 Lua 中是协程），则等待其完成
       const result = handler(session, String(source), ...args);
+      // Promise 会自己管理协程，不需要额外处理
+      // 只需要捕获错误
       if (result && typeof (result as any).then === 'function') {
-        // 在 Lua 中，这会被转换为协程等待
-        (result as Promise<void>).then(() => {
-          // 处理完成
-        }).catch((err) => {
+        (result as Promise<void>).catch((err) => {
           skynet.error(`Dispatch error: ${err}`);
         });
       }
@@ -122,13 +152,16 @@ export class SkynetNetwork implements INetwork {
 export class SkynetService implements IService {
   start(callback: () => void | Promise<void>): void {
     skynet.start(() => {
-      const result = callback();
-      if (result && typeof (result as any).then === 'function') {
-        // 如果是 Promise，等待完成
-        (result as Promise<void>).catch((err) => {
-          skynet.error(`Service start error: ${err}`);
-        });
-      }
+      // 使用 skynet.fork 创建新协程来执行回调
+      // 这样回调中的异步操作不会阻塞服务启动
+      (skynet as any).fork(() => {
+        const result = callback();
+        if (result && typeof (result as any).then === 'function') {
+          (result as Promise<void>).catch((err) => {
+            skynet.error(`Service start error: ${err}`);
+          });
+        }
+      });
     });
   }
 

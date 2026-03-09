@@ -3,7 +3,7 @@ local __TS__AsyncAwaiter = ____lualib.__TS__AsyncAwaiter
 local __TS__Await = ____lualib.__TS__Await
 local __TS__ArrayForEach = ____lualib.__TS__ArrayForEach
 local __TS__SourceMapTraceBack = ____lualib.__TS__SourceMapTraceBack
-__TS__SourceMapTraceBack(debug.getinfo(1).short_src, {["8"] = 8,["9"] = 8,["11"] = 22,["13"] = 31,["15"] = 32,["16"] = 33,["17"] = 34,["18"] = 35,["19"] = 37,["20"] = 39,["21"] = 40,["23"] = 42,["24"] = 42,["26"] = 44,["27"] = 47,["28"] = 49,["29"] = 49,["30"] = 49,["31"] = 49,["32"] = 54,["33"] = 57,["35"] = 43,["38"] = 59,["39"] = 60,["41"] = 43,["42"] = 42,["46"] = 65,["47"] = 66,["48"] = 67,["49"] = 68,["50"] = 70,["51"] = 70,["52"] = 70,["53"] = 70,["54"] = 70,["55"] = 70,["56"] = 70,["57"] = 71,["58"] = 70,["59"] = 70,["60"] = 74,["61"] = 75,["62"] = 76,["64"] = 31,["65"] = 79,["68"] = 81,["70"] = 80,["73"] = 83,["74"] = 84,["76"] = 80,["78"] = 79});
+__TS__SourceMapTraceBack(debug.getinfo(1).short_src, {["8"] = 8,["9"] = 8,["11"] = 22,["13"] = 31,["15"] = 32,["16"] = 33,["17"] = 34,["18"] = 35,["19"] = 37,["20"] = 39,["21"] = 40,["23"] = 42,["24"] = 42,["26"] = 44,["27"] = 47,["28"] = 49,["29"] = 49,["30"] = 49,["31"] = 49,["32"] = 54,["33"] = 57,["35"] = 43,["38"] = 59,["39"] = 60,["41"] = 43,["42"] = 42,["46"] = 65,["47"] = 66,["48"] = 67,["49"] = 68,["50"] = 70,["51"] = 70,["52"] = 70,["53"] = 70,["54"] = 70,["55"] = 70,["56"] = 70,["57"] = 71,["58"] = 70,["59"] = 70,["60"] = 74,["61"] = 75,["62"] = 76,["64"] = 31,["66"] = 82,["68"] = 83,["69"] = 84,["70"] = 85,["71"] = 86,["73"] = 82,["74"] = 91,["75"] = 93,["76"] = 94,["77"] = 95,["78"] = 93,["79"] = 99,["80"] = 99,["82"] = 100,["83"] = 101,["84"] = 102,["86"] = 99,["87"] = 104,["88"] = 91});
 local ____exports = {}
 local ____interfaces = require("framework.core.interfaces")
 local runtime = ____interfaces.runtime
@@ -62,18 +62,28 @@ local function startAllServices()
         rt.logger:info("========================================")
     end)
 end
-runtime.service:start(function()
+--- 启动所有服务（引导函数）
+local function bootstrap()
     return __TS__AsyncAwaiter(function(____awaiter_resolve)
-        local ____try = __TS__AsyncAwaiter(function()
-            __TS__Await(startAllServices())
-        end)
-        __TS__Await(____try.catch(
-            ____try,
-            function(____, ____error)
-                runtime.logger:error("Bootstrap failed:", ____error)
-                runtime.service:exit()
-            end
-        ))
+        __TS__Await(startAllServices())
+        runtime.logger:info("========================================")
+        runtime.logger:info("    Bootstrap completed                 ")
+        runtime.logger:info("========================================")
     end)
+end
+runtime.service:start(function()
+    bootstrap():catch(function(____, ____error)
+        runtime.logger:error("Bootstrap failed:", ____error)
+        runtime.service:exit()
+    end)
+    local keepAlive
+    keepAlive = function()
+        return __TS__AsyncAwaiter(function(____awaiter_resolve)
+            __TS__Await(runtime.timer:sleep(60000))
+            runtime.logger:debug("[Main] Keep alive")
+            keepAlive()
+        end)
+    end
+    keepAlive()
 end)
 return ____exports

@@ -3,9 +3,8 @@ local __TS__New = ____lualib.__TS__New
 local __TS__AsyncAwaiter = ____lualib.__TS__AsyncAwaiter
 local __TS__Await = ____lualib.__TS__Await
 local __TS__InstanceOf = ____lualib.__TS__InstanceOf
-local __TS__Promise = ____lualib.__TS__Promise
 local __TS__SourceMapTraceBack = ____lualib.__TS__SourceMapTraceBack
-__TS__SourceMapTraceBack(debug.getinfo(1).short_src, {["10"] = 7,["11"] = 7,["12"] = 8,["13"] = 8,["14"] = 9,["15"] = 9,["16"] = 10,["17"] = 10,["18"] = 10,["19"] = 15,["20"] = 18,["22"] = 23,["25"] = 24,["26"] = 25,["29"] = 26,["30"] = 27,["31"] = 30,["32"] = 31,["33"] = 31,["34"] = 31,["35"] = 31,["36"] = 31,["37"] = 36,["38"] = 37,["40"] = 39,["45"] = 44,["48"] = 45,["49"] = 46,["50"] = 49,["51"] = 50,["52"] = 54,["54"] = 57,["58"] = 61,["61"] = 62,["62"] = 63,["63"] = 64,["67"] = 68,["70"] = 69,["71"] = 70,["72"] = 71,["76"] = 75,["79"] = 76,["80"] = 77,["84"] = 81,["87"] = 82,["88"] = 83,["89"] = 84,["93"] = 88,["96"] = 89,["97"] = 90,["98"] = 91,["102"] = 95,["105"] = 96,["106"] = 97,["111"] = 102,["112"] = 103,["116"] = 23,["118"] = 110,["120"] = 111,["121"] = 112,["125"] = 118,["126"] = 119,["127"] = 122,["128"] = 122,["129"] = 122,["130"] = 122,["131"] = 127,["132"] = 128,["134"] = 116,["137"] = 130,["139"] = 116,["141"] = 110,["143"] = 137,["145"] = 138,["146"] = 139,["150"] = 145,["151"] = 145,["152"] = 145,["153"] = 147,["154"] = 148,["155"] = 149,["156"] = 152,["157"] = 153,["158"] = 153,["159"] = 153,["160"] = 153,["161"] = 153,["162"] = 153,["163"] = 153,["164"] = 158,["166"] = 160,["169"] = 143,["172"] = 163,["173"] = 164,["174"] = 164,["175"] = 164,["176"] = 164,["178"] = 143,["180"] = 137,["181"] = 171,["182"] = 172,["183"] = 173,["184"] = 176,["185"] = 176,["186"] = 176,["187"] = 176,["188"] = 177,["189"] = 180,["192"] = 180,["194"] = 182,["195"] = 183,["196"] = 184,["197"] = 185,["199"] = 187,["202"] = 180,["203"] = 180,["204"] = 190,["205"] = 191,["206"] = 191,["207"] = 191,["208"] = 191,["209"] = 180,["210"] = 176,["211"] = 176,["212"] = 195,["213"] = 196,["214"] = 200,["215"] = 200,["216"] = 201,["219"] = 201,["220"] = 202,["221"] = 203,["222"] = 201,["224"] = 200,["225"] = 206,["226"] = 171});
+__TS__SourceMapTraceBack(debug.getinfo(1).short_src, {["9"] = 7,["10"] = 7,["11"] = 8,["12"] = 8,["13"] = 9,["14"] = 9,["15"] = 10,["16"] = 10,["17"] = 10,["18"] = 16,["19"] = 19,["21"] = 24,["24"] = 25,["25"] = 26,["28"] = 27,["29"] = 28,["30"] = 31,["31"] = 32,["32"] = 32,["33"] = 32,["34"] = 32,["35"] = 32,["36"] = 37,["37"] = 38,["39"] = 40,["44"] = 45,["47"] = 46,["48"] = 47,["49"] = 50,["50"] = 51,["51"] = 55,["53"] = 58,["57"] = 62,["60"] = 63,["61"] = 64,["62"] = 65,["66"] = 69,["69"] = 70,["70"] = 71,["71"] = 72,["75"] = 76,["78"] = 77,["79"] = 78,["83"] = 82,["86"] = 83,["87"] = 84,["88"] = 85,["92"] = 89,["95"] = 90,["96"] = 91,["97"] = 92,["101"] = 96,["104"] = 97,["105"] = 98,["110"] = 103,["111"] = 104,["115"] = 24,["117"] = 111,["119"] = 112,["120"] = 113,["124"] = 119,["125"] = 120,["126"] = 123,["127"] = 123,["128"] = 123,["129"] = 123,["130"] = 128,["131"] = 129,["133"] = 117,["136"] = 131,["138"] = 117,["140"] = 111,["142"] = 138,["144"] = 139,["145"] = 140,["149"] = 146,["150"] = 146,["151"] = 146,["152"] = 148,["153"] = 149,["154"] = 150,["155"] = 153,["156"] = 154,["157"] = 154,["158"] = 154,["159"] = 154,["160"] = 154,["161"] = 154,["162"] = 154,["163"] = 159,["165"] = 161,["168"] = 144,["171"] = 164,["172"] = 165,["173"] = 165,["174"] = 165,["175"] = 165,["177"] = 144,["179"] = 138,["180"] = 172,["181"] = 173,["182"] = 174,["183"] = 177,["184"] = 177,["185"] = 177,["186"] = 177,["188"] = 178,["190"] = 182,["191"] = 183,["192"] = 184,["193"] = 185,["195"] = 187,["198"] = 180,["201"] = 190,["202"] = 191,["203"] = 191,["204"] = 191,["205"] = 191,["207"] = 180,["209"] = 177,["210"] = 177,["211"] = 195,["212"] = 196,["213"] = 200,["214"] = 200,["216"] = 201,["217"] = 202,["218"] = 203,["220"] = 200,["221"] = 205,["222"] = 172});
 local ____exports = {}
 local ____interfaces = require("framework.core.interfaces")
 local runtime = ____interfaces.runtime
@@ -185,27 +184,27 @@ runtime.service:start(function()
         "lua",
         function(session, source, cmd, ...)
             local args = {...}
-            runtime.logger:debug((("Gateway received command: " .. cmd) .. " from ") .. source)
-            local ____self_1 = __TS__Promise.resolve()
-            ____self_1["then"](
-                ____self_1,
-                function()
-                    return __TS__AsyncAwaiter(function(____awaiter_resolve)
-                        if cmd == "heartbeat" and __TS__InstanceOf(args[1], Uint8Array) then
-                            __TS__Await(handleHeartbeat(args[1]))
-                        elseif cmd == "forward_login" and __TS__InstanceOf(args[1], Uint8Array) then
-                            __TS__Await(forwardToLogin(args[1]))
-                        else
-                            __TS__Await(handleCommand(cmd, args))
-                        end
-                    end)
-                end
-            ):catch(function(____, ____error)
-                runtime.logger:error(("Command " .. cmd) .. " failed:", ____error)
-                runtime.network:ret(
-                    false,
-                    tostring(____error)
-                )
+            return __TS__AsyncAwaiter(function(____awaiter_resolve)
+                runtime.logger:debug((("Gateway received command: " .. cmd) .. " from ") .. source)
+                local ____try = __TS__AsyncAwaiter(function()
+                    if cmd == "heartbeat" and __TS__InstanceOf(args[1], Uint8Array) then
+                        __TS__Await(handleHeartbeat(args[1]))
+                    elseif cmd == "forward_login" and __TS__InstanceOf(args[1], Uint8Array) then
+                        __TS__Await(forwardToLogin(args[1]))
+                    else
+                        __TS__Await(handleCommand(cmd, args))
+                    end
+                end)
+                __TS__Await(____try.catch(
+                    ____try,
+                    function(____, ____error)
+                        runtime.logger:error(("Command " .. cmd) .. " failed:", ____error)
+                        runtime.network:ret(
+                            false,
+                            tostring(____error)
+                        )
+                    end
+                ))
             end)
         end
     )
@@ -213,14 +212,11 @@ runtime.service:start(function()
     runtime.logger:info("Connections: " .. tostring(data:getCount()))
     local keepAlive
     keepAlive = function()
-        local ____self_2 = runtime.timer:sleep(30000)
-        ____self_2["then"](
-            ____self_2,
-            function()
-                runtime.logger:debug("[Gateway] Keep alive, connections: " .. tostring(data:getCount()))
-                keepAlive()
-            end
-        )
+        return __TS__AsyncAwaiter(function(____awaiter_resolve)
+            __TS__Await(runtime.timer:sleep(30000))
+            runtime.logger:debug("[Gateway] Keep alive, connections: " .. tostring(data:getCount()))
+            keepAlive()
+        end)
     end
     keepAlive()
 end)

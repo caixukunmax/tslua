@@ -75,7 +75,7 @@ export class LoginLogic {
     runtime.logger.info(`Logout userId: ${userId}`);
 
     const session = this.data.getSession(userId);
-    if (session === undefined) {
+    if (session == null) {
       runtime.logger.warn(`User ${userId} not found`);
       return false;
     }
@@ -93,7 +93,7 @@ export class LoginLogic {
    */
   getUserInfo(userId: number): User | undefined {
     const session = this.data.getSession(userId);
-    if (session === undefined) {
+    if (session == null) {
       return undefined;
     }
 

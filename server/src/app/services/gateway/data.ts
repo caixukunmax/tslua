@@ -104,10 +104,10 @@ export class ConnectionData {
    * 导入状态（用于热更新时的状态迁移）
    */
   importState(state: DataState): void {
-    if (state.connections !== undefined) {
+    if (state.connections != null) {
       this.connections = new Map(state.connections);
     }
-    if (state.nextConnId !== undefined) {
+    if (state.nextConnId != null) {
       this.nextConnId = state.nextConnId;
     }
   }

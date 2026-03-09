@@ -20,6 +20,8 @@ services:
     volumes:
       # 挂载配置文件
       - ./config/skynet:/skynet-config:ro
+      # 挂载原生 Lua 脚本（console、ts_bootstrap 等）
+      - ./native:/skynet/native:ro
       # 挂载 Lua 服务代码（外部编译后 copy 到 ./lua/）
       - ./lua:/skynet/lua:ro
       # 日志持久化
@@ -48,6 +50,8 @@ services:
       - "9999:9999"
     volumes:
       - ./config/skynet:/skynet-config:ro
+      # 挂载原生 Lua 脚本（console、ts_bootstrap 等）
+      - ./native:/skynet/native:ro
       - ./lua:/skynet/lua:ro  # 挂载 Lua 代码（开发时方便更新）
       - skynet-logs:/skynet/logs
     environment:

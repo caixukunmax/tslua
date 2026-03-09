@@ -6,6 +6,7 @@
 import { IPbCodec } from '../core/interfaces';
 
 // protobufjs 类型声明（实际使用时通过 require 导入）
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 type PbType = {
   encode: (message: any) => { finish: () => Uint8Array };
   decode: (reader: Uint8Array) => any;
@@ -40,6 +41,7 @@ const MESSAGE_TYPE_MAP: Record<number, string> = {
 };
 
 const MSG_ID_TO_NAME: Record<number, string> = MESSAGE_TYPE_MAP;
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const MSG_NAME_TO_ID: Record<string, number> = Object.fromEntries(
   Object.entries(MESSAGE_TYPE_MAP).map(([id, name]) => [name, parseInt(id)])
 );
@@ -54,9 +56,9 @@ export class NodePbCodec implements IPbCodec {
 
   private initProto(): void {
     try {
-      // 动态加载 proto.js（编译后生成）
-      const protoPath = require.resolve('../../protos/proto.js');
-      const protoModule = require(protoPath);
+      // 静态导入 proto.js（编译后生成）
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
+      const protoModule = require('../../protos/proto');
       this.proto = protoModule.proto;
       this.root = protoModule;
     } catch (error) {

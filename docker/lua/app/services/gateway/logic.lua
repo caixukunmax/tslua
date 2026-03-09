@@ -41,7 +41,7 @@ function GatewayLogic.prototype.handleDisconnect(self, connId)
         return ____awaiter_resolve(nil, success)
     end)
 end
-function GatewayLogic.prototype.handleForward(self, connId, message)
+function GatewayLogic.prototype.handleForward(self, connId, _message)
     return __TS__AsyncAwaiter(function(____awaiter_resolve)
         local conn = self.data:getConnection(connId)
         if not conn then
@@ -72,7 +72,7 @@ end
 function GatewayLogic.prototype.findConnectionByUserId(self, userId)
     return self.data:findByUserId(userId)
 end
-function GatewayLogic.prototype.broadcast(self, message)
+function GatewayLogic.prototype.broadcast(self, _message)
     return __TS__AsyncAwaiter(function(____awaiter_resolve)
         local connections = self.data:getAllConnections()
         runtime.logger:info(("Broadcasting message to " .. tostring(#connections)) .. " connections")

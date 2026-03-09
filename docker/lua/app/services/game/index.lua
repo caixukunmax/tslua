@@ -3,7 +3,7 @@ local __TS__New = ____lualib.__TS__New
 local __TS__AsyncAwaiter = ____lualib.__TS__AsyncAwaiter
 local __TS__Await = ____lualib.__TS__Await
 local __TS__SourceMapTraceBack = ____lualib.__TS__SourceMapTraceBack
-__TS__SourceMapTraceBack(debug.getinfo(1).short_src, {["8"] = 7,["9"] = 7,["10"] = 8,["11"] = 8,["12"] = 9,["13"] = 9,["14"] = 10,["15"] = 10,["16"] = 14,["17"] = 17,["19"] = 22,["22"] = 23,["23"] = 24,["26"] = 25,["27"] = 26,["28"] = 29,["29"] = 30,["30"] = 30,["31"] = 32,["32"] = 32,["33"] = 32,["34"] = 32,["35"] = 32,["36"] = 32,["37"] = 30,["38"] = 30,["39"] = 40,["40"] = 41,["42"] = 43,["47"] = 48,["50"] = 49,["51"] = 50,["52"] = 51,["56"] = 55,["59"] = 56,["60"] = 57,["61"] = 60,["62"] = 61,["63"] = 61,["64"] = 61,["65"] = 61,["66"] = 61,["67"] = 61,["68"] = 61,["69"] = 68,["70"] = 69,["72"] = 71,["77"] = 76,["80"] = 77,["81"] = 78,["82"] = 79,["86"] = 83,["89"] = 84,["90"] = 85,["94"] = 89,["97"] = 90,["98"] = 91,["102"] = 95,["105"] = 96,["106"] = 97,["111"] = 102,["112"] = 103,["116"] = 22,["117"] = 108,["119"] = 109,["120"] = 110,["121"] = 113,["122"] = 113,["123"] = 113,["124"] = 113,["126"] = 114,["128"] = 117,["130"] = 116,["133"] = 119,["134"] = 120,["135"] = 120,["136"] = 120,["137"] = 120,["139"] = 116,["141"] = 113,["142"] = 113,["143"] = 124,["144"] = 125,["146"] = 108});
+__TS__SourceMapTraceBack(debug.getinfo(1).short_src, {["8"] = 7,["9"] = 7,["10"] = 8,["11"] = 8,["12"] = 9,["13"] = 9,["14"] = 11,["15"] = 11,["16"] = 15,["17"] = 18,["19"] = 23,["22"] = 24,["23"] = 25,["26"] = 26,["27"] = 27,["28"] = 30,["29"] = 31,["30"] = 31,["31"] = 33,["32"] = 33,["33"] = 33,["34"] = 33,["35"] = 33,["36"] = 33,["37"] = 31,["38"] = 31,["39"] = 41,["40"] = 42,["42"] = 44,["47"] = 49,["50"] = 50,["51"] = 51,["52"] = 52,["56"] = 56,["59"] = 57,["60"] = 58,["61"] = 61,["62"] = 62,["63"] = 62,["64"] = 62,["65"] = 62,["66"] = 62,["67"] = 62,["68"] = 62,["69"] = 69,["70"] = 70,["72"] = 72,["77"] = 77,["80"] = 78,["81"] = 79,["82"] = 80,["86"] = 84,["89"] = 85,["90"] = 86,["94"] = 90,["97"] = 91,["98"] = 92,["102"] = 96,["105"] = 97,["106"] = 98,["111"] = 103,["112"] = 104,["116"] = 23,["117"] = 110,["118"] = 111,["119"] = 112,["120"] = 115,["121"] = 115,["122"] = 115,["123"] = 115,["125"] = 116,["127"] = 119,["129"] = 118,["132"] = 121,["133"] = 122,["134"] = 122,["135"] = 122,["136"] = 122,["138"] = 118,["140"] = 115,["141"] = 115,["142"] = 126,["143"] = 127,["144"] = 130,["145"] = 130,["147"] = 131,["148"] = 132,["149"] = 133,["151"] = 130,["152"] = 135,["153"] = 110});
 local ____exports = {}
 local ____interfaces = require("framework.core.interfaces")
 local runtime = ____interfaces.runtime
@@ -115,33 +115,40 @@ local function handleCommand(cmd, args)
     end)
 end
 runtime.service:start(function()
-    return __TS__AsyncAwaiter(function(____awaiter_resolve)
-        runtime.logger:info("=== Game Service Starting ===")
-        runtime.logger:info("Service address: " .. runtime.service:self())
-        runtime.network:dispatch(
-            "lua",
-            function(session, source, cmd, ...)
-                local args = {...}
-                return __TS__AsyncAwaiter(function(____awaiter_resolve)
-                    runtime.logger:debug((("Game received command: " .. cmd) .. " from ") .. source)
-                    local ____try = __TS__AsyncAwaiter(function()
-                        __TS__Await(handleCommand(cmd, args))
-                    end)
-                    __TS__Await(____try.catch(
-                        ____try,
-                        function(____, ____error)
-                            runtime.logger:error(("Command " .. cmd) .. " failed:", ____error)
-                            runtime.network:ret(
-                                false,
-                                tostring(____error)
-                            )
-                        end
-                    ))
+    runtime.logger:info("=== Game Service Starting ===")
+    runtime.logger:info("Service address: " .. runtime.service:self())
+    runtime.network:dispatch(
+        "lua",
+        function(session, source, cmd, ...)
+            local args = {...}
+            return __TS__AsyncAwaiter(function(____awaiter_resolve)
+                runtime.logger:debug((("Game received command: " .. cmd) .. " from ") .. source)
+                local ____try = __TS__AsyncAwaiter(function()
+                    __TS__Await(handleCommand(cmd, args))
                 end)
-            end
-        )
-        runtime.logger:info("=== Game Service Ready ===")
-        runtime.logger:info("Online players: " .. tostring(data:getCount()))
-    end)
+                __TS__Await(____try.catch(
+                    ____try,
+                    function(____, ____error)
+                        runtime.logger:error(("Command " .. cmd) .. " failed:", ____error)
+                        runtime.network:ret(
+                            false,
+                            tostring(____error)
+                        )
+                    end
+                ))
+            end)
+        end
+    )
+    runtime.logger:info("=== Game Service Ready ===")
+    runtime.logger:info("Online players: " .. tostring(data:getCount()))
+    local keepAlive
+    keepAlive = function()
+        return __TS__AsyncAwaiter(function(____awaiter_resolve)
+            __TS__Await(runtime.timer:sleep(30000))
+            runtime.logger:debug("[Game] Keep alive, players: " .. tostring(data:getCount()))
+            keepAlive()
+        end)
+    end
+    keepAlive()
 end)
 return ____exports

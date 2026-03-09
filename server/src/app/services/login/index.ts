@@ -7,18 +7,17 @@
 import { runtime } from '../../../framework/core/interfaces';
 import { SessionData } from './data';
 import { LoginLogic } from './logic';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { MessageId, proto } from '../../../protos';
-import type { LoginRequest, LoginResponse, User } from './types';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import type { LoginRequest, LoginResponse } from './types';
 import type { LoginResponse as ProtoLoginResponse } from '../../../protos';
 
 // 数据层：持久化状态，不热更
 const data = new SessionData();
 
 // 逻辑层：业务逻辑，可热更
-let logic = new LoginLogic(data);
-
-// 会话清理定时器
-let cleanupTimer: NodeJS.Timeout | null = null;
+const logic = new LoginLogic(data);
 
 /**
  * 构建 proto 格式的登录响应
@@ -49,7 +48,7 @@ async function handleCommand(cmd: string, args: unknown[]): Promise<void> {
     case 'login': {
       const [username, password] = args as [string, string];
       const response = await logic.handleLogin({ username, password });
-      
+
       // 如果有 codec，使用 proto 序列化
       if (runtime.codec) {
         const protoResponse = buildProtoLoginResponse(response);
@@ -104,24 +103,21 @@ async function handleCommand(cmd: string, args: unknown[]): Promise<void> {
 /**
  * 启动会话清理定时器
  */
-function startSessionCleaner(): void {
-  const cleanupInterval = 60000; // 1分钟
-  const expireTime = 3600000; // 1小时
+async function startSessionCleaner(): Promise<void> {
+  const cleanupInterval = 60000; // 1 分钟
+  const expireTime = 3600000; // 1 小时
 
   const cleanup = async () => {
     await logic.cleanExpiredSessions(expireTime);
   };
 
   runtime.logger.info('Session cleaner started');
-  
-  // 使用定时器（注意：在 Lua 环境中需要使用 runtime.timer）
-  const runCleanup = () => {
-    cleanup().then(() => {
-      runtime.timer.sleep(cleanupInterval).then(runCleanup);
-    });
-  };
-  
-  runCleanup();
+
+  // 使用 async/await 循环清理
+  while (true) {
+    await cleanup();
+    await runtime.timer.sleep(cleanupInterval);
+  }
 }
 
 // 启动服务
@@ -131,19 +127,15 @@ runtime.service.start(() => {
   runtime.logger.info(`Service address: ${runtime.service.self()}`);
 
   // 注册消息处理器（handler 内部可以用 async）
-  runtime.network.dispatch('lua', (session: number, source: string, cmd: string, ...args: unknown[]) => {
+  runtime.network.dispatch('lua', async (session: number, source: string, cmd: string, ...args: unknown[]) => {
     runtime.logger.debug(`Login received command: ${cmd} from ${source}`);
 
-    // 使用 Promise 处理异步
-    Promise.resolve()
-      .then(() => handleCommand(cmd, args))
-      .then((result) => {
-        runtime.network.ret(result);
-      })
-      .catch((error) => {
-        runtime.logger.error(`Command ${cmd} failed:`, error);
-        runtime.network.ret(false, undefined, String(error));
-      });
+    try {
+      await handleCommand(cmd, args);
+    } catch (error) {
+      runtime.logger.error(`Command ${cmd} failed:`, error);
+      runtime.network.ret(false, undefined, String(error));
+    }
   });
 
   // 启动会话清理
@@ -152,12 +144,11 @@ runtime.service.start(() => {
   runtime.logger.info('=== Login Service Ready ===');
   runtime.logger.info(`Sessions: ${data.getCount()}`);
 
-  // 【必须】保持服务运行
-  const keepAlive = () => {
-    runtime.timer.sleep(30000).then(() => {
-      runtime.logger.debug(`[Login] Keep alive, sessions: ${data.getCount()}`);
-      keepAlive();
-    });
+  // 【必须】保持服务运行 - 使用纯协程方式
+  const keepAlive = async () => {
+    await runtime.timer.sleep(30000);
+    runtime.logger.debug(`[Login] Keep alive, sessions: ${data.getCount()}`);
+    keepAlive();
   };
   keepAlive();
 });

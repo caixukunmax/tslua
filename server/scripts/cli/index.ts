@@ -425,23 +425,74 @@ async function showMenu() {
 
 // 命令实现
 async function cmdQuickStart() {
-  info('一键启动...');
+  info('🚀 智能启动...');
+  
+  // 1. 检查依赖
+  info('📦 检查依赖...');
+  const nodeModulesPath = path.join(PROJECT_ROOT, 'node_modules');
+  if (!exists(nodeModulesPath)) {
+    warn('node_modules 不存在，正在安装依赖...');
+    await exec('npm', ['install'], { cwd: PROJECT_ROOT });
+  } else {
+    success('依赖已安装');
+  }
+  
+  // 2. 编译代码
+  info('🔨 编译 TypeScript → Lua...');
   const buildSuccess = await cmdBuildTS();
   if (!buildSuccess) {
     error('编译失败，停止启动');
     return;
   }
-  const code = await exec('docker', ['compose', '-f', 'compose.yml', 'up', '-d', 'skynet'], { cwd: DOCKER_DIR });
-  if (code === 0) {
-    success('服务已启动');
-    info('查看日志: docker compose logs -f skynet');
-  } else {
-    error(`Docker 启动失败 (exit code: ${code})`);
-    info('可能原因：');
-    info('  1. Docker Desktop 未启动');
-    info('  2. 网络问题无法拉取镜像');
-    info('  3. 端口被占用');
+  
+  // 3. 检查 Docker 环境
+  const dockerVersion = execOutput('docker --version');
+  if (!dockerVersion) {
+    error('Docker 未安装或未启动');
+    return;
   }
+  
+  // 4. 检查镜像是否存在
+  const IMAGE_NAME = 'docker-skynet';
+  info(`🔍 检查镜像 ${IMAGE_NAME}...`);
+  const imageExists = execOutput(`docker images -q ${IMAGE_NAME}`);
+  
+  if (!imageExists) {
+    warn(`镜像 ${IMAGE_NAME} 不存在，正在构建...`);
+    const buildCode = await exec('docker', ['compose', '-f', 'compose.yml', 'build', 'skynet'], { cwd: DOCKER_DIR });
+    if (buildCode !== 0) {
+      error('镜像构建失败');
+      return;
+    }
+    success('镜像构建完成');
+  } else {
+    success(`镜像 ${IMAGE_NAME} 已存在`);
+  }
+  
+  // 5. 检查容器是否存在
+  const CONTAINER_NAME = 'tslua-skynet';
+  info(`🔍 检查容器 ${CONTAINER_NAME}...`);
+  const containerExists = execOutput(`docker ps -a --filter "name=${CONTAINER_NAME}" --format "{{.Names}}"`);
+  const containerRunning = execOutput(`docker ps --filter "name=${CONTAINER_NAME}" --format "{{.Names}}"`);
+  
+  if (!containerExists) {
+    // 容器不存在，创建并启动
+    warn(`容器 ${CONTAINER_NAME} 不存在，正在创建...`);
+    const code = await exec('docker', ['compose', '-f', 'compose.yml', 'up', '-d', 'skynet'], { cwd: DOCKER_DIR });
+    if (code === 0) {
+      success('容器创建并启动成功');
+    } else {
+      error('容器创建失败');
+    }
+  } else {
+    // 容器存在，直接重启（会自动加载最新代码）
+    info(`🔄 容器 ${CONTAINER_NAME} 存在，正在重启...`);
+    await exec('docker', ['compose', '-f', 'compose.yml', 'restart', 'skynet'], { cwd: DOCKER_DIR });
+    success('容器重启成功');
+  }
+  
+  success('✅ 启动完成！');
+  info('📋 查看日志: docker compose logs -f skynet');
 }
 
 async function cmdStart() {

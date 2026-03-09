@@ -47,17 +47,17 @@ export class PlayerData {
    */
   updatePlayer(userId: number, update: PlayerUpdate): boolean {
     const player = this.players.get(userId);
-    if (player === undefined) {
+    if (player == null) {
       return false;
     }
 
-    if (update.level !== undefined) {
+    if (update.level != null) {
       player.level = update.level;
     }
-    if (update.exp !== undefined) {
+    if (update.exp != null) {
       player.exp = update.exp;
     }
-    if (update.gold !== undefined) {
+    if (update.gold != null) {
       player.gold = update.gold;
     }
 
@@ -105,7 +105,7 @@ export class PlayerData {
    * 导入状态（用于热更新时的状态迁移）
    */
   importState(state: DataState): void {
-    if (state.players !== undefined) {
+    if (state.players != null) {
       this.players = new Map(state.players);
     }
   }

@@ -8,14 +8,15 @@ import { runtime } from '../../../framework/core/interfaces';
 import { ConnectionData } from './data';
 import { GatewayLogic } from './logic';
 import { MessageId, proto } from '../../../protos';
-import type { CommandName, ClientInfo, AnyMessage } from './types';
+import type { ClientInfo, AnyMessage } from './types';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import type { ConnectResponse as ProtoConnectResponse, HeartbeatResponse as ProtoHeartbeatResponse, LoginRequest as ProtoLoginRequest } from '../../../protos';
 
 // 数据层：持久化状态，不热更
 const data = new ConnectionData();
 
 // 逻辑层：业务逻辑，可热更
-let logic = new GatewayLogic(data);
+const logic = new GatewayLogic(data);
 
 /**
  * 命令分发处理
@@ -25,7 +26,7 @@ async function handleCommand(cmd: string, args: unknown[]): Promise<void> {
     case 'connect': {
       const [clientInfo] = args as [ClientInfo];
       const connId = await logic.handleConnect(clientInfo);
-      
+
       // 使用 protobuf 返回连接响应
       if (runtime.codec) {
         const response = proto.gateway.ConnectResponse.create({
@@ -44,7 +45,7 @@ async function handleCommand(cmd: string, args: unknown[]): Promise<void> {
     case 'disconnect': {
       const [connId, reason] = args as [number, string?];
       const success = await logic.handleDisconnect(connId);
-      
+
       // 发送断开通知（使用 protobuf）
       if (runtime.codec && success) {
         const notify = proto.gateway.DisconnectNotify.create({
@@ -53,7 +54,7 @@ async function handleCommand(cmd: string, args: unknown[]): Promise<void> {
         // 可以广播给相关服务
         runtime.logger.info(`Disconnect notify: ${notify.reason}`);
       }
-      
+
       runtime.network.ret(success);
       break;
     }
@@ -150,8 +151,8 @@ async function forwardToLogin(packetData: Uint8Array): Promise<void> {
 
       // 调用登录服务（传递 protobuf 数据）
       const loginService = await runtime.service.newService('login');
-      const response = await runtime.network.call(loginService, 'lua', 'login', 
-        loginReq.username, 
+      const response = await runtime.network.call(loginService, 'lua', 'login',
+        loginReq.username,
         loginReq.password
       );
 
@@ -173,11 +174,10 @@ runtime.service.start(() => {
   runtime.logger.info(`Service address: ${runtime.service.self()}`);
 
   // 注册消息处理器（handler 内部可以用 async）
-  runtime.network.dispatch('lua', (session: number, source: string, cmd: string, ...args: any[]) => {
+  runtime.network.dispatch('lua', async (session: number, source: string, cmd: string, ...args: any[]) => {
     runtime.logger.debug(`Gateway received command: ${cmd} from ${source}`);
 
-    // 使用 Promise 处理异步
-    Promise.resolve().then(async () => {
+    try {
       // 特殊处理 protobuf 消息
       if (cmd === 'heartbeat' && args[0] instanceof Uint8Array) {
         await handleHeartbeat(args[0]);
@@ -186,10 +186,10 @@ runtime.service.start(() => {
       } else {
         await handleCommand(cmd, args);
       }
-    }).catch((error) => {
+    } catch (error) {
       runtime.logger.error(`Command ${cmd} failed:`, error);
       runtime.network.ret(false, String(error));
-    });
+    }
   });
 
   runtime.logger.info('=== Gateway Service Ready ===');
@@ -197,11 +197,10 @@ runtime.service.start(() => {
 
   // 【重要】启动后台定时器保持服务运行
   // Skynet 服务需要至少一个活跃的协程，否则会退出
-  const keepAlive = () => {
-    runtime.timer.sleep(30000).then(() => {
-      runtime.logger.debug(`[Gateway] Keep alive, connections: ${data.getCount()}`);
-      keepAlive();  // 递归保持循环
-    });
+  const keepAlive = async () => {
+    await runtime.timer.sleep(30000);
+    runtime.logger.debug(`[Gateway] Keep alive, connections: ${data.getCount()}`);
+    keepAlive();
   };
   keepAlive();
 });

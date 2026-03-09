@@ -1,6 +1,6 @@
 local ____lualib = require("lualib_bundle")
 local __TS__SourceMapTraceBack = ____lualib.__TS__SourceMapTraceBack
-__TS__SourceMapTraceBack(debug.getinfo(1).short_src, {["6"] = 186,["7"] = 187,["8"] = 188,["11"] = 195,["12"] = 196,["14"] = 201,["15"] = 203,["16"] = 204,["17"] = 205,["18"] = 206,["19"] = 207,["20"] = 208,["21"] = 209,["22"] = 201});
+__TS__SourceMapTraceBack(debug.getinfo(1).short_src, {["6"] = 201,["7"] = 202,["8"] = 203,["11"] = 210,["12"] = 211,["14"] = 216,["15"] = 218,["16"] = 219,["17"] = 220,["18"] = 221,["19"] = 222,["20"] = 223,["21"] = 224,["22"] = 216});
 local ____exports = {}
 --- 运行时环境类型
 ____exports.RuntimeEnvironment = RuntimeEnvironment or ({})

@@ -45,7 +45,7 @@ export class GameLogic {
     runtime.logger.info(`User ${userId} leaving game`);
 
     const player = this.data.getPlayer(userId);
-    if (player === undefined) {
+    if (player == null) {
       runtime.logger.warn(`Player ${userId} not found`);
       return false;
     }
@@ -111,7 +111,7 @@ export class GameLogic {
    */
   async levelUp(userId: number): Promise<boolean> {
     const player = this.data.getPlayer(userId);
-    if (player === undefined) {
+    if (player == null) {
       return false;
     }
 
@@ -126,7 +126,7 @@ export class GameLogic {
    */
   async addExp(userId: number, expAmount: number): Promise<boolean> {
     const player = this.data.getPlayer(userId);
-    if (player === undefined) {
+    if (player == null) {
       return false;
     }
 
@@ -150,7 +150,7 @@ export class GameLogic {
    */
   async addGold(userId: number, goldAmount: number): Promise<boolean> {
     const player = this.data.getPlayer(userId);
-    if (player === undefined) {
+    if (player == null) {
       return false;
     }
 

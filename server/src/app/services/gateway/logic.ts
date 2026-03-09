@@ -56,7 +56,7 @@ export class GatewayLogic {
   /**
    * 转发消息到后端服务
    */
-  async handleForward(connId: number, message: AnyMessage): Promise<boolean> {
+  async handleForward(connId: number, _message: AnyMessage): Promise<boolean> {
     const conn = this.data.getConnection(connId);
     if (!conn) {
       runtime.logger.warn(`Connection ${connId} not found`);
@@ -113,7 +113,7 @@ export class GatewayLogic {
   /**
    * 广播消息给所有连接
    */
-  async broadcast(message: AnyMessage): Promise<void> {
+  async broadcast(_message: AnyMessage): Promise<void> {
     const connections = this.data.getAllConnections();
     runtime.logger.info(`Broadcasting message to ${connections.length} connections`);
 

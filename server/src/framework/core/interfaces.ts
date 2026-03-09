@@ -40,6 +40,21 @@ export interface ITimer {
    * 获取当前时间戳（秒）
    */
   now(): number;
+
+  /**
+   * 协程安全的 setTimeout
+   * 回调函数会在 Skynet 协程中执行，内部可以使用 async/await
+   * @param callback 回调函数（可以是 async）
+   * @param ms 延迟毫秒数
+   */
+  safeTimeout(callback: () => void | Promise<void>, ms?: number): void;
+
+  /**
+   * 协程安全的 setImmediate
+   * 回调函数会在 Skynet 协程中执行，内部可以使用 async/await
+   * @param callback 回调函数（可以是 async）
+   */
+  safeImmediate(callback: () => void | Promise<void>): void;
 }
 
 /**
