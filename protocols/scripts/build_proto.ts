@@ -111,12 +111,18 @@ function main(): void {
     execSync('protoc --version', { stdio: 'ignore' });
     protocCmd = 'protoc';
   } catch {
-    // 检查 node_modules 中的 protoc
-    const localProtoc = path.join(baseDir, 'node_modules', '.bin', 'protoc');
+    // 检查本地 bin 目录中的 protoc
+    const localProtoc = path.join(baseDir, 'bin', 'protoc.exe');
     if (fs.existsSync(localProtoc)) {
       protocCmd = localProtoc;
     } else {
-      warn('protoc not found, skipping .desc generation');
+      // 检查 node_modules 中的 protoc
+      const npmProtoc = path.join(baseDir, 'node_modules', '.bin', 'protoc');
+      if (fs.existsSync(npmProtoc)) {
+        protocCmd = npmProtoc;
+      } else {
+        warn('protoc not found, skipping .desc generation');
+      }
     }
   }
 
