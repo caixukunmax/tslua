@@ -1080,6 +1080,7 @@ const CONTAINER_NAME = 'tslua-skynet';  // 容器名
 - `runtime.timer.sleep()` 改用 `skynet.timeout` 而非 `skynet.sleep` ⚠️ **待商讨**
 - `runtime.service.start()` 使用 `skynet.fork` 包装回调
 - `runtime.network.dispatch()` 简化为直接调用
+- **已实现**：`docker/native/async_skynet.lua` - Skynet 协程补丁
 
 **待商讨：sleep() 实现方案**
 
