@@ -26,20 +26,28 @@ import { SkynetPbCodec } from './skynet-pb-codec';
  * Skynet 日志实现
  */
 export class SkynetLogger implements ILogger {
+  private logLevel: 'debug' | 'info' | 'warn' | 'error' = 'info';
+
   debug(message: string, ...args: any[]): void {
-    skynet.error(`[DEBUG] ${message} ${this.formatArgs(args)}`);
+    if (this.logLevel !== 'debug') return;
+    skynet.error(`[DEBUG] ${this.timestamp()} ${message} ${this.formatArgs(args)}`);
   }
 
   info(message: string, ...args: any[]): void {
-    skynet.error(`[INFO] ${message} ${this.formatArgs(args)}`);
+    skynet.error(`[INFO] ${this.timestamp()} ${message} ${this.formatArgs(args)}`);
   }
 
   warn(message: string, ...args: any[]): void {
-    skynet.error(`[WARN] ${message} ${this.formatArgs(args)}`);
+    skynet.error(`[WARN] ${this.timestamp()} ${message} ${this.formatArgs(args)}`);
   }
 
   error(message: string, ...args: any[]): void {
-    skynet.error(`[ERROR] ${message} ${this.formatArgs(args)}`);
+    skynet.error(`[ERROR] ${this.timestamp()} ${message} ${this.formatArgs(args)}`);
+  }
+
+  private timestamp(): string {
+    const now = new Date();
+    return `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}:${now.getSeconds().toString().padStart(2, '0')}`;
   }
 
   private formatArgs(args: any[]): string {

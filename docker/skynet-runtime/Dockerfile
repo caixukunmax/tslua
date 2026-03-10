@@ -68,6 +68,9 @@ COPY ./skynet-runtime/config.tslua /skynet/config.tslua
 # 复制编译好的 Lua 服务代码
 COPY lua/ /skynet/lua/
 
+# 复制原生 Lua 脚本（启动引导、全局对象注入等）
+COPY native/ /skynet/lua/native/
+
 # 暴露端口
 EXPOSE 8888 9999
 

@@ -1,3 +1,4 @@
+/** @noSelfInFile */
 // Skynet-compatible version of async awaiter
 // Uses skynet.fork to create coroutines in Skynet's scheduler
 //
@@ -7,18 +8,28 @@
 
 import { __TS__Promise } from "./Promise";
 
+// Declare skynet with this: void methods to ensure dot notation
+interface SkynetApi {
+    fork: (this: void, fn: () => void) => void;
+    timeout: (this: void, ms: number, fn: () => void) => void;
+    error: (this: void, msg: string) => void;
+}
+
 const coroutine = _G.coroutine ?? {};
 const cocreate = coroutine.create;
 const coresume = coroutine.resume;
 const costatus = coroutine.status;
 const coyield = coroutine.yield;
 
-// Try to get skynet module (will be nil if not in Skynet environment)
-const skynet = _G.package?.loaded?.["skynet"] ?? (_G as any).skynet;
+// Dynamic skynet getter - must be called at runtime, not module load time
+// This ensures _G.skynet is available after ts_bootstrap.lua injection
+function getSkynet(): SkynetApi | undefined {
+    return (_G as any).package?.loaded?.["skynet"] ?? (_G as any).skynet;
+}
 
 // Be extremely careful editing this function. A single non-tail function call may ruin chained awaits performance
 // eslint-disable-next-line @typescript-eslint/promise-function-async
-export function __TS__AsyncAwaiter(this: void, generator: (this: void) => void) {
+export function __TS__AsyncAwaiterSkynet(this: void, generator: (this: void) => void) {
     return new Promise((resolve, reject) => {
         let resolved = false;
         let asyncCoroutine: any;
@@ -64,8 +75,9 @@ export function __TS__AsyncAwaiter(this: void, generator: (this: void) => void) 
 
         // If skynet.fork is available, use it to start the coroutine
         // Otherwise fall back to direct execution (for non-Skynet environments)
-        if (skynet && typeof (skynet as any).fork === "function") {
-            (skynet as any).fork(startCoroutine);
+        const skynet = getSkynet();
+        if (skynet && typeof skynet.fork === "function") {
+            skynet.fork(startCoroutine);
         } else {
             startCoroutine();
         }
@@ -75,3 +87,6 @@ export function __TS__AsyncAwaiter(this: void, generator: (this: void) => void) 
 export function __TS__Await(this: void, thing: unknown) {
     return coyield(thing);
 }
+
+// Alias for skynetCompat mode - transformLuaLibFunction generates __TS__AwaitSkynet
+export const __TS__AwaitSkynet = __TS__Await;

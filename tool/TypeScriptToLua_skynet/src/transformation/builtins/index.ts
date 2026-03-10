@@ -9,7 +9,7 @@ import { getCalledExpression } from "../visitors/call";
 import { transformArrayConstructorCall, transformArrayProperty, transformArrayPrototypeCall } from "./array";
 import { transformConsoleCall } from "./console";
 import { transformFunctionPrototypeCall, transformFunctionProperty } from "./function";
-import { tryTransformBuiltinGlobalCall } from "./global";
+import { tryTransformBuiltinGlobalCall, tryTransformTimerCall } from "./global";
 import { transformMathCall, transformMathProperty } from "./math";
 import { transformNumberConstructorCall, transformNumberPrototypeCall, transformNumberProperty } from "./number";
 import { transformObjectConstructorCall, tryTransformObjectPrototypeCall } from "./object";
@@ -54,6 +54,10 @@ export function transformBuiltinCallExpression(
     context: TransformationContext,
     node: ts.CallExpression
 ): lua.Expression | undefined {
+    // Try timer call transformation first (for skynetCompat)
+    const timerResult = tryTransformTimerCall(context, node);
+    if (timerResult) return timerResult;
+
     const expressionType = context.checker.getTypeAtLocation(node.expression);
     if (ts.isIdentifier(node.expression) && isStandardLibraryType(context, expressionType, undefined)) {
         checkForLuaLibType(context, expressionType);

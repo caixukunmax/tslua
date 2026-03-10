@@ -1,9 +1,10 @@
 local ____lualib = require("lualib_bundle")
 local __TS__New = ____lualib.__TS__New
-local __TS__AsyncAwaiter = ____lualib.__TS__AsyncAwaiter
+local __TS__AsyncAwaiterSkynet = ____lualib.__TS__AsyncAwaiterSkynet
 local __TS__Await = ____lualib.__TS__Await
+local __TS__AwaitSkynet = ____lualib.__TS__AwaitSkynet
 local __TS__SourceMapTraceBack = ____lualib.__TS__SourceMapTraceBack
-__TS__SourceMapTraceBack(debug.getinfo(1).short_src, {["8"] = 7,["9"] = 7,["10"] = 8,["11"] = 8,["12"] = 9,["13"] = 9,["14"] = 11,["15"] = 11,["16"] = 17,["17"] = 20,["19"] = 25,["20"] = 26,["21"] = 27,["22"] = 28,["23"] = 29,["24"] = 30,["25"] = 30,["26"] = 30,["27"] = 30,["28"] = 30,["29"] = 29,["30"] = 38,["31"] = 26,["32"] = 25,["35"] = 46,["38"] = 47,["39"] = 48,["42"] = 49,["43"] = 50,["44"] = 53,["45"] = 54,["46"] = 55,["47"] = 56,["49"] = 59,["54"] = 64,["57"] = 65,["58"] = 66,["59"] = 67,["63"] = 71,["66"] = 72,["67"] = 73,["68"] = 74,["72"] = 78,["75"] = 79,["76"] = 80,["77"] = 81,["81"] = 85,["84"] = 86,["85"] = 87,["89"] = 91,["92"] = 92,["93"] = 93,["98"] = 98,["99"] = 99,["103"] = 46,["105"] = 106,["107"] = 107,["108"] = 108,["109"] = 110,["111"] = 111,["113"] = 110,["114"] = 114,["115"] = 117,["116"] = 118,["117"] = 119,["120"] = 106,["121"] = 125,["122"] = 126,["123"] = 127,["124"] = 130,["125"] = 130,["126"] = 130,["127"] = 130,["129"] = 131,["131"] = 134,["133"] = 133,["136"] = 136,["137"] = 137,["138"] = 137,["139"] = 137,["140"] = 137,["141"] = 137,["143"] = 133,["145"] = 130,["146"] = 130,["147"] = 142,["148"] = 144,["149"] = 145,["150"] = 148,["151"] = 148,["153"] = 149,["154"] = 150,["155"] = 151,["157"] = 148,["158"] = 153,["159"] = 125});
+__TS__SourceMapTraceBack(debug.getinfo(1).short_src, {["9"] = 7,["10"] = 7,["11"] = 8,["12"] = 8,["13"] = 9,["14"] = 9,["15"] = 11,["16"] = 11,["17"] = 17,["18"] = 20,["20"] = 25,["21"] = 26,["22"] = 27,["23"] = 28,["24"] = 29,["25"] = 30,["26"] = 30,["27"] = 30,["28"] = 30,["29"] = 30,["30"] = 29,["31"] = 38,["32"] = 26,["33"] = 25,["36"] = 46,["39"] = 47,["40"] = 48,["43"] = 49,["44"] = 50,["45"] = 53,["46"] = 54,["47"] = 55,["48"] = 56,["50"] = 59,["55"] = 64,["58"] = 65,["59"] = 66,["60"] = 67,["64"] = 71,["67"] = 72,["68"] = 73,["69"] = 74,["73"] = 78,["76"] = 79,["77"] = 80,["78"] = 81,["82"] = 85,["85"] = 86,["86"] = 87,["90"] = 91,["93"] = 92,["94"] = 93,["99"] = 98,["100"] = 99,["104"] = 46,["106"] = 106,["108"] = 107,["109"] = 108,["110"] = 110,["112"] = 111,["114"] = 110,["115"] = 114,["116"] = 117,["117"] = 118,["118"] = 119,["121"] = 106,["122"] = 125,["123"] = 126,["124"] = 127,["125"] = 130,["126"] = 130,["127"] = 130,["128"] = 130,["130"] = 131,["132"] = 134,["134"] = 133,["137"] = 136,["138"] = 137,["139"] = 137,["140"] = 137,["141"] = 137,["142"] = 137,["144"] = 133,["146"] = 130,["147"] = 130,["148"] = 142,["149"] = 144,["150"] = 145,["151"] = 148,["152"] = 148,["154"] = 149,["155"] = 150,["156"] = 151,["158"] = 148,["159"] = 153,["160"] = 125});
 local ____exports = {}
 local ____interfaces = require("framework.core.interfaces")
 local runtime = ____interfaces.runtime
@@ -33,14 +34,14 @@ end
 --- 命令分发处理
 -- 支持 proto 序列化
 local function handleCommand(cmd, args)
-    return __TS__AsyncAwaiter(function(____awaiter_resolve)
+    return __TS__AsyncAwaiterSkynet(function(____awaiter_resolve)
         repeat
             local ____switch4 = cmd
             local ____cond4 = ____switch4 == "login"
             if ____cond4 then
                 do
                     local username, password = table.unpack(args, 1, 2)
-                    local response = __TS__Await(logic:handleLogin({username = username, password = password}))
+                    local response = __TS__AwaitSkynet(logic:handleLogin({username = username, password = password}))
                     if runtime.codec then
                         local protoResponse = buildProtoLoginResponse(response)
                         local encoded = runtime.codec:encode("login.LoginResponse", protoResponse)
@@ -55,7 +56,7 @@ local function handleCommand(cmd, args)
             if ____cond4 then
                 do
                     local userId = table.unpack(args, 1, 1)
-                    local success = __TS__Await(logic:handleLogout(userId))
+                    local success = __TS__AwaitSkynet(logic:handleLogout(userId))
                     runtime.network:ret(success)
                     break
                 end
@@ -103,18 +104,18 @@ local function handleCommand(cmd, args)
 end
 --- 启动会话清理定时器
 local function startSessionCleaner()
-    return __TS__AsyncAwaiter(function(____awaiter_resolve)
+    return __TS__AsyncAwaiterSkynet(function(____awaiter_resolve)
         local cleanupInterval = 60000
         local expireTime = 3600000
         local function cleanup()
-            return __TS__AsyncAwaiter(function(____awaiter_resolve)
-                __TS__Await(logic:cleanExpiredSessions(expireTime))
+            return __TS__AsyncAwaiterSkynet(function(____awaiter_resolve)
+                __TS__AwaitSkynet(logic:cleanExpiredSessions(expireTime))
             end)
         end
         runtime.logger:info("Session cleaner started")
         while true do
-            __TS__Await(cleanup())
-            __TS__Await(runtime.timer:sleep(cleanupInterval))
+            __TS__AwaitSkynet(cleanup())
+            __TS__AwaitSkynet(runtime.timer:sleep(cleanupInterval))
         end
     end)
 end
@@ -125,12 +126,12 @@ runtime.service:start(function()
         "lua",
         function(session, source, cmd, ...)
             local args = {...}
-            return __TS__AsyncAwaiter(function(____awaiter_resolve)
+            return __TS__AsyncAwaiterSkynet(function(____awaiter_resolve)
                 runtime.logger:debug((("Login received command: " .. cmd) .. " from ") .. source)
-                local ____try = __TS__AsyncAwaiter(function()
-                    __TS__Await(handleCommand(cmd, args))
+                local ____try = __TS__AsyncAwaiterSkynet(function()
+                    __TS__AwaitSkynet(handleCommand(cmd, args))
                 end)
-                __TS__Await(____try.catch(
+                __TS__AwaitSkynet(____try.catch(
                     ____try,
                     function(____, ____error)
                         runtime.logger:error(("Command " .. cmd) .. " failed:", ____error)
@@ -149,8 +150,8 @@ runtime.service:start(function()
     runtime.logger:info("Sessions: " .. tostring(data:getCount()))
     local keepAlive
     keepAlive = function()
-        return __TS__AsyncAwaiter(function(____awaiter_resolve)
-            __TS__Await(runtime.timer:sleep(30000))
+        return __TS__AsyncAwaiterSkynet(function(____awaiter_resolve)
+            __TS__AwaitSkynet(runtime.timer:sleep(30000))
             runtime.logger:debug("[Login] Keep alive, sessions: " .. tostring(data:getCount()))
             keepAlive()
         end)

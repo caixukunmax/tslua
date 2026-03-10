@@ -1,9 +1,10 @@
 local ____lualib = require("lualib_bundle")
 local __TS__New = ____lualib.__TS__New
-local __TS__AsyncAwaiter = ____lualib.__TS__AsyncAwaiter
+local __TS__AsyncAwaiterSkynet = ____lualib.__TS__AsyncAwaiterSkynet
 local __TS__Await = ____lualib.__TS__Await
+local __TS__AwaitSkynet = ____lualib.__TS__AwaitSkynet
 local __TS__SourceMapTraceBack = ____lualib.__TS__SourceMapTraceBack
-__TS__SourceMapTraceBack(debug.getinfo(1).short_src, {["8"] = 7,["9"] = 7,["10"] = 8,["11"] = 8,["12"] = 9,["13"] = 9,["14"] = 11,["15"] = 11,["16"] = 15,["17"] = 18,["19"] = 23,["22"] = 24,["23"] = 25,["26"] = 26,["27"] = 27,["28"] = 30,["29"] = 31,["30"] = 31,["31"] = 33,["32"] = 33,["33"] = 33,["34"] = 33,["35"] = 33,["36"] = 33,["37"] = 31,["38"] = 31,["39"] = 41,["40"] = 42,["42"] = 44,["47"] = 49,["50"] = 50,["51"] = 51,["52"] = 52,["56"] = 56,["59"] = 57,["60"] = 58,["61"] = 61,["62"] = 62,["63"] = 62,["64"] = 62,["65"] = 62,["66"] = 62,["67"] = 62,["68"] = 62,["69"] = 69,["70"] = 70,["72"] = 72,["77"] = 77,["80"] = 78,["81"] = 79,["82"] = 80,["86"] = 84,["89"] = 85,["90"] = 86,["94"] = 90,["97"] = 91,["98"] = 92,["102"] = 96,["105"] = 97,["106"] = 98,["111"] = 103,["112"] = 104,["116"] = 23,["117"] = 110,["118"] = 111,["119"] = 112,["120"] = 115,["121"] = 115,["122"] = 115,["123"] = 115,["125"] = 116,["127"] = 119,["129"] = 118,["132"] = 121,["133"] = 122,["134"] = 122,["135"] = 122,["136"] = 122,["138"] = 118,["140"] = 115,["141"] = 115,["142"] = 126,["143"] = 127,["144"] = 130,["145"] = 130,["147"] = 131,["148"] = 132,["149"] = 133,["151"] = 130,["152"] = 135,["153"] = 110});
+__TS__SourceMapTraceBack(debug.getinfo(1).short_src, {["9"] = 7,["10"] = 7,["11"] = 8,["12"] = 8,["13"] = 9,["14"] = 9,["15"] = 11,["16"] = 11,["17"] = 15,["18"] = 18,["20"] = 23,["23"] = 24,["24"] = 25,["27"] = 26,["28"] = 27,["29"] = 30,["30"] = 31,["31"] = 31,["32"] = 33,["33"] = 33,["34"] = 33,["35"] = 33,["36"] = 33,["37"] = 33,["38"] = 31,["39"] = 31,["40"] = 41,["41"] = 42,["43"] = 44,["48"] = 49,["51"] = 50,["52"] = 51,["53"] = 52,["57"] = 56,["60"] = 57,["61"] = 58,["62"] = 61,["63"] = 62,["64"] = 62,["65"] = 62,["66"] = 62,["67"] = 62,["68"] = 62,["69"] = 62,["70"] = 69,["71"] = 70,["73"] = 72,["78"] = 77,["81"] = 78,["82"] = 79,["83"] = 80,["87"] = 84,["90"] = 85,["91"] = 86,["95"] = 90,["98"] = 91,["99"] = 92,["103"] = 96,["106"] = 97,["107"] = 98,["112"] = 103,["113"] = 104,["117"] = 23,["118"] = 110,["119"] = 111,["120"] = 112,["121"] = 115,["122"] = 115,["123"] = 115,["124"] = 115,["126"] = 116,["128"] = 119,["130"] = 118,["133"] = 121,["134"] = 122,["135"] = 122,["136"] = 122,["137"] = 122,["139"] = 118,["141"] = 115,["142"] = 115,["143"] = 126,["144"] = 127,["145"] = 130,["146"] = 130,["148"] = 131,["149"] = 132,["150"] = 133,["152"] = 130,["153"] = 135,["154"] = 110});
 local ____exports = {}
 local ____interfaces = require("framework.core.interfaces")
 local runtime = ____interfaces.runtime
@@ -17,14 +18,14 @@ local data = __TS__New(PlayerData)
 local logic = __TS__New(GameLogic, data)
 --- 命令分发处理
 local function handleCommand(cmd, args)
-    return __TS__AsyncAwaiter(function(____awaiter_resolve)
+    return __TS__AsyncAwaiterSkynet(function(____awaiter_resolve)
         repeat
             local ____switch3 = cmd
             local ____cond3 = ____switch3 == "enterGame"
             if ____cond3 then
                 do
                     local userId = table.unpack(args, 1, 1)
-                    local player = __TS__Await(logic:handleEnterGame(userId))
+                    local player = __TS__AwaitSkynet(logic:handleEnterGame(userId))
                     if runtime.codec and player then
                         local response = proto.game.EnterGameResponse.create({
                             success = true,
@@ -48,7 +49,7 @@ local function handleCommand(cmd, args)
             if ____cond3 then
                 do
                     local userId = table.unpack(args, 1, 1)
-                    local success = __TS__Await(logic:handleLeaveGame(userId))
+                    local success = __TS__AwaitSkynet(logic:handleLeaveGame(userId))
                     runtime.network:ret(success)
                     break
                 end
@@ -78,7 +79,7 @@ local function handleCommand(cmd, args)
             if ____cond3 then
                 do
                     local userId, update = table.unpack(args, 1, 2)
-                    local success = __TS__Await(logic:updatePlayer(userId, update))
+                    local success = __TS__AwaitSkynet(logic:updatePlayer(userId, update))
                     runtime.network:ret(success)
                     break
                 end
@@ -121,12 +122,12 @@ runtime.service:start(function()
         "lua",
         function(session, source, cmd, ...)
             local args = {...}
-            return __TS__AsyncAwaiter(function(____awaiter_resolve)
+            return __TS__AsyncAwaiterSkynet(function(____awaiter_resolve)
                 runtime.logger:debug((("Game received command: " .. cmd) .. " from ") .. source)
-                local ____try = __TS__AsyncAwaiter(function()
-                    __TS__Await(handleCommand(cmd, args))
+                local ____try = __TS__AsyncAwaiterSkynet(function()
+                    __TS__AwaitSkynet(handleCommand(cmd, args))
                 end)
-                __TS__Await(____try.catch(
+                __TS__AwaitSkynet(____try.catch(
                     ____try,
                     function(____, ____error)
                         runtime.logger:error(("Command " .. cmd) .. " failed:", ____error)
@@ -143,8 +144,8 @@ runtime.service:start(function()
     runtime.logger:info("Online players: " .. tostring(data:getCount()))
     local keepAlive
     keepAlive = function()
-        return __TS__AsyncAwaiter(function(____awaiter_resolve)
-            __TS__Await(runtime.timer:sleep(30000))
+        return __TS__AsyncAwaiterSkynet(function(____awaiter_resolve)
+            __TS__AwaitSkynet(runtime.timer:sleep(30000))
             runtime.logger:debug("[Game] Keep alive, players: " .. tostring(data:getCount()))
             keepAlive()
         end)

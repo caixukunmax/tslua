@@ -40,6 +40,7 @@ export enum LuaLibFeature {
     ArrayWith = "ArrayWith",
     Await = "Await",
     AwaitSkynet = "AwaitSkynet",
+    SetTimeoutSkynet = "SetTimeoutSkynet",
     Class = "Class",
     ClassExtends = "ClassExtends",
     CloneDescriptor = "CloneDescriptor",

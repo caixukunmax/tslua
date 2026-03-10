@@ -75,6 +75,11 @@ export const optionDeclarations: CommandLineOption[] = [
         type: "boolean",
     },
     {
+        name: "skynetCompat",
+        description: "Enable Skynet compatibility mode for async/await and setTimeout (uses skynet.fork).",
+        type: "boolean",
+    },
+    {
         name: "sourceMapTraceback",
         description: "Applies the source map to show source TS files and lines in error tracebacks.",
         type: "boolean",

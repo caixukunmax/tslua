@@ -5,6 +5,7 @@
     "module": "ESNext",
     "moduleResolution": "bundler",
     "strict": true,
+    "skipLibCheck": true,
     "rootDir": "../src",
     "outDir": "../dist/lua"
   },
@@ -14,10 +15,7 @@
     "sourceMapTraceback": true,
     "noImplicitSelf": true,
     "noHeader": true,
-    "skynetCompat": true,
-    "luaPlugins": [
-      { "name": "../plugins/safe-timers.js" }
-    ]
+    "skynetCompat": true
   },
   "include": ["../src/**/*"],
   "exclude": ["../node_modules", "../plugins", "../**/*.spec.ts"]

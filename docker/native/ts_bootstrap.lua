@@ -8,6 +8,9 @@
 
 local skynet = require "skynet"
 
+-- 注入 skynet 到全局（供 TSTL 编译的 lualib_bundle 使用）
+_G.skynet = skynet
+
 -- 1. 注入全局对象
 require "global"
 require "process"

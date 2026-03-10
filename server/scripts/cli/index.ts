@@ -225,7 +225,7 @@ const PARSED_ARGS = (() => {
 const CONFIG = loadConfig(PARSED_ARGS.configFile);
 
 // 获取路径（优先级: 命令行参数 > 配置文件 > 默认值）
-function getPath(key: keyof Config['paths'] | keyof Config['build'] | keyof Config['docker'], type: 'paths' | 'build' | 'docker'): string {
+function getPath(key: keyof Required<Config>['paths'] | keyof Required<Config>['build'] | keyof Required<Config>['docker'], type: 'paths' | 'build' | 'docker'): string {
   const cliKey = `${type}.${key}`;
   if (PARSED_ARGS.options[cliKey]) {
     return path.resolve(PROJECT_ROOT, PARSED_ARGS.options[cliKey]);
@@ -329,7 +329,7 @@ const commands: Record<string, { desc: string; fn: () => Promise<void> }> = {
   },
   'build:ts': {
     desc: '编译 TypeScript → Lua',
-    fn: cmdBuildTS,
+    fn: async () => { await cmdBuildTS(); },
   },
   'build:all': {
     desc: '完整构建（Proto + Tables + TS）',
@@ -561,6 +561,8 @@ async function cmdBuildTS(): Promise<boolean> {
     success('编译完成 → dist/lua/');
     // 自动复制到 docker/lua/ 目录
     await copyLuaToDocker();
+    // 清理 dist 目录（保持工作区干净）
+    cleanDist();
     return true;
   } else {
     error('编译失败');
@@ -621,6 +623,17 @@ async function cmdBuildAll() {
   // TS
   await cmdBuildTS();
   success('完整构建完成');
+}
+
+/**
+ * 清理 dist 目录（编译后已复制到 docker，保留 dist 无意义）
+ */
+function cleanDist() {
+  const distDir = path.join(SERVER_DIR_CFG, 'dist');
+  if (exists(distDir)) {
+    fs.rmSync(distDir, { recursive: true, force: true });
+    info('已清理 dist/ 目录');
+  }
 }
 
 async function cmdClean() {

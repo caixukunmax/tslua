@@ -33,7 +33,10 @@ export function wrapInAsyncAwaiter(
 
     const parameters = includeResolveParameter ? [lua.createIdentifier("____awaiter_resolve")] : [];
 
-    return lua.createCallExpression(lua.createIdentifier("__TS__AsyncAwaiter"), [
+    // Use different function names to avoid conflict in lualib_bundle
+    const functionName = context.options.skynetCompat ? "__TS__AsyncAwaiterSkynet" : "__TS__AsyncAwaiter";
+
+    return lua.createCallExpression(lua.createIdentifier(functionName), [
         lua.createFunctionExpression(lua.createBlock(statements), parameters),
     ]);
 }

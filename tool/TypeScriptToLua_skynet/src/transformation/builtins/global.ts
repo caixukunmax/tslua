@@ -42,3 +42,37 @@ export function tryTransformBuiltinGlobalCall(
             return transformLuaLibFunction(context, LuaLibFeature.ParseInt, node, ...getParameters());
     }
 }
+
+/**
+ * Transform setTimeout/setImmediate/clearTimeout calls when skynetCompat is enabled
+ */
+export function tryTransformTimerCall(
+    context: TransformationContext,
+    node: ts.CallExpression
+): lua.Expression | undefined {
+    // Only transform when skynetCompat is enabled
+    if (!context.options.skynetCompat) {
+        return undefined;
+    }
+
+    if (!ts.isIdentifier(node.expression)) {
+        return undefined;
+    }
+
+    const name = node.expression.text;
+    const signature = context.checker.getResolvedSignature(node);
+    const parameters = transformArguments(context, node.arguments, signature);
+
+    switch (name) {
+        case "setTimeout":
+            return transformLuaLibFunction(context, LuaLibFeature.SetTimeoutSkynet, node, ...parameters);
+        case "setImmediate":
+            // setImmediate is equivalent to setTimeout(callback, 0)
+            return transformLuaLibFunction(context, LuaLibFeature.SetTimeoutSkynet, node, ...parameters);
+        case "clearTimeout":
+            // clearTimeout is a no-op in Skynet
+            return transformLuaLibFunction(context, LuaLibFeature.SetTimeoutSkynet, node, ...parameters);
+    }
+
+    return undefined;
+}

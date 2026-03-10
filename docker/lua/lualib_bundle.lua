@@ -827,6 +827,145 @@ do
     end
 end
 
+local __TS__AsyncAwaiterSkynet, __TS__Await, __TS__AwaitSkynet
+do
+    local ____coroutine = _G.coroutine or ({})
+    local cocreate = ____coroutine.create
+    local coresume = ____coroutine.resume
+    local costatus = ____coroutine.status
+    local coyield = ____coroutine.yield
+    local function getSkynet()
+        local ____opt_2 = _G.package
+        if ____opt_2 ~= nil then
+            ____opt_2 = ____opt_2.loaded
+        end
+        local ____opt_result_4
+        if ____opt_2 ~= nil then
+            ____opt_result_4 = ____opt_2.skynet
+        end
+        local ____opt_result_4_5 = ____opt_result_4
+        if ____opt_result_4_5 == nil then
+            ____opt_result_4_5 = _G.skynet
+        end
+        return ____opt_result_4_5
+    end
+    function __TS__AsyncAwaiterSkynet(generator)
+        return __TS__New(
+            __TS__Promise,
+            function(____, resolve, reject)
+                local fulfilled, step, resolved, asyncCoroutine
+                function fulfilled(value)
+                    local success, resultOrError = coresume(asyncCoroutine, value)
+                    if success then
+                        return step(resultOrError)
+                    end
+                    return reject(nil, resultOrError)
+                end
+                function step(result)
+                    if resolved then
+                        return
+                    end
+                    if costatus(asyncCoroutine) == "dead" then
+                        return resolve(nil, result)
+                    end
+                    return __TS__Promise.resolve(result):addCallbacks(fulfilled, reject)
+                end
+                resolved = false
+                local function startCoroutine()
+                    asyncCoroutine = cocreate(generator)
+                    local success, resultOrError = coresume(
+                        asyncCoroutine,
+                        function(v)
+                            resolved = true
+                            return __TS__Promise.resolve(v):addCallbacks(resolve, reject)
+                        end
+                    )
+                    if success then
+                        return step(resultOrError)
+                    else
+                        return reject(nil, resultOrError)
+                    end
+                end
+                local skynet = getSkynet()
+                if skynet and type(skynet.fork) == "function" then
+                    skynet.fork(startCoroutine)
+                else
+                    startCoroutine()
+                end
+            end
+        )
+    end
+    function __TS__Await(thing)
+        return coyield(thing)
+    end
+    __TS__AwaitSkynet = __TS__Await
+end
+
+local __TS__setTimeoutSkynet, __TS__setImmediateSkynet, __TS__clearTimeoutSkynet
+do
+    local function getSkynet()
+        local ____opt_2 = _G.package
+        if ____opt_2 ~= nil then
+            ____opt_2 = ____opt_2.loaded
+        end
+        local ____opt_result_4
+        if ____opt_2 ~= nil then
+            ____opt_result_4 = ____opt_2.skynet
+        end
+        local ____opt_result_4_5 = ____opt_result_4
+        if ____opt_result_4_5 == nil then
+            ____opt_result_4_5 = _G.skynet
+        end
+        return ____opt_result_4_5
+    end
+    function __TS__setTimeoutSkynet(callback, delay)
+        local skynet = getSkynet()
+        if not skynet or type(skynet.timeout) ~= "function" then
+            return 0
+        end
+        local centiseconds = math.floor((delay or 0) / 10)
+        local timerId = 0
+        skynet.timeout(
+            centiseconds,
+            function()
+                if type(skynet.fork) == "function" then
+                    skynet.fork(function()
+                        do
+                            local function ____catch(err)
+                                skynet.error("[setTimeout] Callback error: " .. tostring(err))
+                            end
+                            local ____try, ____hasReturned = pcall(function()
+                                callback()
+                            end)
+                            if not ____try then
+                                ____catch(____hasReturned)
+                            end
+                        end
+                    end)
+                else
+                    do
+                        local function ____catch(err)
+                            skynet.error("[setTimeout] Callback error: " .. tostring(err))
+                        end
+                        local ____try, ____hasReturned = pcall(function()
+                            callback()
+                        end)
+                        if not ____try then
+                            ____catch(____hasReturned)
+                        end
+                    end
+                end
+            end
+        )
+        return timerId
+    end
+    function __TS__setImmediateSkynet(callback)
+        return __TS__setTimeoutSkynet(callback, 0)
+    end
+    function __TS__clearTimeoutSkynet(_handle)
+    end
+end
+
 local function __TS__ClassExtends(target, base)
     target.____super = base
     local staticMetatable = setmetatable({__index = base}, base)
@@ -2241,7 +2380,7 @@ local function __TS__SourceMapTraceBack(fileName, sourceMap)
             end
             local result = string.gsub(
                 trace,
-                "(%S+)%.lua:(%d+)",
+                "([^%s<]+)%.lua:(%d+)",
                 function(file, line) return replacer(nil, file .. ".lua", file .. ".ts", line) end
             )
             local function stringReplacer(____, file, line)
@@ -2640,6 +2779,12 @@ return {
   __TS__ArrayWith = __TS__ArrayWith,
   __TS__AsyncAwaiter = __TS__AsyncAwaiter,
   __TS__Await = __TS__Await,
+  __TS__AsyncAwaiterSkynet = __TS__AsyncAwaiterSkynet,
+  __TS__Await = __TS__Await,
+  __TS__AwaitSkynet = __TS__AwaitSkynet,
+  __TS__setTimeoutSkynet = __TS__setTimeoutSkynet,
+  __TS__setImmediateSkynet = __TS__setImmediateSkynet,
+  __TS__clearTimeoutSkynet = __TS__clearTimeoutSkynet,
   __TS__Class = __TS__Class,
   __TS__ClassExtends = __TS__ClassExtends,
   __TS__CloneDescriptor = __TS__CloneDescriptor,
