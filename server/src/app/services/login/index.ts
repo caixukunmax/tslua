@@ -8,7 +8,7 @@ import { runtime } from '../../../framework/core/interfaces';
 import { SessionData } from './data';
 import { LoginLogic } from './logic';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { MessageId, proto } from '../../../protos';
+import { MessageId, proto, ErrorCode } from '../../../protos';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import type { LoginRequest, LoginResponse } from './types';
 import type { LoginResponse as ProtoLoginResponse } from '../../../protos';
@@ -24,7 +24,7 @@ const logic = new LoginLogic(data);
  */
 function buildProtoLoginResponse(response: LoginResponse): ProtoLoginResponse {
   return proto.login.LoginResponse.create({
-    code: response.success ? proto.common.ErrorCode.SUCCESS : proto.common.ErrorCode.UNAUTHORIZED,
+    code: response.success ? ErrorCode.SUCCESS : ErrorCode.UNAUTHORIZED,
     message: response.error || '',
     user: response.user
       ? {

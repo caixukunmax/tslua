@@ -4,7 +4,7 @@ local __TS__AsyncAwaiterSkynet = ____lualib.__TS__AsyncAwaiterSkynet
 local __TS__Await = ____lualib.__TS__Await
 local __TS__AwaitSkynet = ____lualib.__TS__AwaitSkynet
 local __TS__SourceMapTraceBack = ____lualib.__TS__SourceMapTraceBack
-__TS__SourceMapTraceBack(debug.getinfo(1).short_src, {["9"] = 7,["10"] = 7,["11"] = 8,["12"] = 8,["13"] = 9,["14"] = 9,["15"] = 11,["16"] = 11,["17"] = 15,["18"] = 18,["20"] = 23,["23"] = 24,["24"] = 25,["27"] = 26,["28"] = 27,["29"] = 30,["30"] = 31,["31"] = 31,["32"] = 33,["33"] = 33,["34"] = 33,["35"] = 33,["36"] = 33,["37"] = 33,["38"] = 31,["39"] = 31,["40"] = 41,["41"] = 42,["43"] = 44,["48"] = 49,["51"] = 50,["52"] = 51,["53"] = 52,["57"] = 56,["60"] = 57,["61"] = 58,["62"] = 61,["63"] = 62,["64"] = 62,["65"] = 62,["66"] = 62,["67"] = 62,["68"] = 62,["69"] = 62,["70"] = 69,["71"] = 70,["73"] = 72,["78"] = 77,["81"] = 78,["82"] = 79,["83"] = 80,["87"] = 84,["90"] = 85,["91"] = 86,["95"] = 90,["98"] = 91,["99"] = 92,["103"] = 96,["106"] = 97,["107"] = 98,["112"] = 103,["113"] = 104,["117"] = 23,["118"] = 110,["119"] = 111,["120"] = 112,["121"] = 115,["122"] = 115,["123"] = 115,["124"] = 115,["126"] = 116,["128"] = 119,["130"] = 118,["133"] = 121,["134"] = 122,["135"] = 122,["136"] = 122,["137"] = 122,["139"] = 118,["141"] = 115,["142"] = 115,["143"] = 126,["144"] = 127,["145"] = 130,["146"] = 130,["148"] = 131,["149"] = 132,["150"] = 133,["152"] = 130,["153"] = 135,["154"] = 110});
+__TS__SourceMapTraceBack(debug.getinfo(1).short_src, {["9"] = 7,["10"] = 7,["11"] = 8,["12"] = 8,["13"] = 9,["14"] = 9,["15"] = 11,["16"] = 11,["17"] = 11,["18"] = 15,["19"] = 18,["21"] = 23,["24"] = 24,["25"] = 25,["28"] = 26,["29"] = 27,["30"] = 30,["31"] = 31,["32"] = 31,["33"] = 31,["34"] = 34,["35"] = 34,["36"] = 34,["37"] = 34,["38"] = 34,["39"] = 34,["40"] = 31,["41"] = 31,["42"] = 42,["43"] = 43,["45"] = 45,["50"] = 50,["53"] = 51,["54"] = 52,["55"] = 53,["59"] = 57,["62"] = 58,["63"] = 59,["64"] = 62,["65"] = 63,["66"] = 63,["67"] = 63,["68"] = 63,["69"] = 63,["70"] = 63,["71"] = 63,["72"] = 70,["73"] = 71,["75"] = 73,["80"] = 78,["83"] = 79,["84"] = 80,["85"] = 81,["89"] = 85,["92"] = 86,["93"] = 87,["97"] = 91,["100"] = 92,["101"] = 93,["105"] = 97,["108"] = 98,["109"] = 99,["114"] = 104,["115"] = 105,["119"] = 23,["120"] = 111,["121"] = 112,["122"] = 113,["123"] = 116,["124"] = 116,["125"] = 116,["126"] = 116,["128"] = 117,["130"] = 120,["132"] = 119,["135"] = 122,["136"] = 123,["137"] = 123,["138"] = 123,["139"] = 123,["141"] = 119,["143"] = 116,["144"] = 116,["145"] = 127,["146"] = 128,["147"] = 131,["148"] = 131,["150"] = 132,["151"] = 133,["152"] = 134,["154"] = 131,["155"] = 136,["156"] = 111});
 local ____exports = {}
 local ____interfaces = require("framework.core.interfaces")
 local runtime = ____interfaces.runtime
@@ -14,6 +14,7 @@ local ____logic = require("app.services.game.logic")
 local GameLogic = ____logic.GameLogic
 local ____protos = require("protos.index")
 local proto = ____protos.proto
+local ErrorCode = ____protos.ErrorCode
 local data = __TS__New(PlayerData)
 local logic = __TS__New(GameLogic, data)
 --- 命令分发处理
@@ -28,13 +29,14 @@ local function handleCommand(cmd, args)
                     local player = __TS__AwaitSkynet(logic:handleEnterGame(userId))
                     if runtime.codec and player then
                         local response = proto.game.EnterGameResponse.create({
-                            success = true,
-                            playerInfo = {
+                            code = ErrorCode.SUCCESS,
+                            message = "Enter game success",
+                            player = {
                                 userId = player.userId,
-                                username = "Player_" .. tostring(player.userId),
                                 level = player.level,
                                 exp = player.exp,
-                                gold = player.gold
+                                gold = player.gold,
+                                enterTime = Date:now()
                             }
                         })
                         local encoded = runtime.codec:encode("game.EnterGameResponse", response)
@@ -62,10 +64,10 @@ local function handleCommand(cmd, args)
                     if runtime.codec and player then
                         local playerInfo = proto.game.PlayerInfo.create({
                             userId = player.userId,
-                            username = "Player_" .. tostring(player.userId),
                             level = player.level,
                             exp = player.exp,
-                            gold = player.gold
+                            gold = player.gold,
+                            enterTime = Date:now()
                         })
                         local encoded = runtime.codec:encode("game.PlayerInfo", playerInfo)
                         runtime.network:ret(true, encoded)

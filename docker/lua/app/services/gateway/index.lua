@@ -5,7 +5,7 @@ local __TS__Await = ____lualib.__TS__Await
 local __TS__AwaitSkynet = ____lualib.__TS__AwaitSkynet
 local __TS__InstanceOf = ____lualib.__TS__InstanceOf
 local __TS__SourceMapTraceBack = ____lualib.__TS__SourceMapTraceBack
-__TS__SourceMapTraceBack(debug.getinfo(1).short_src, {["10"] = 7,["11"] = 7,["12"] = 8,["13"] = 8,["14"] = 9,["15"] = 9,["16"] = 10,["17"] = 10,["18"] = 10,["19"] = 16,["20"] = 19,["22"] = 24,["25"] = 25,["26"] = 26,["29"] = 27,["30"] = 28,["31"] = 31,["32"] = 32,["33"] = 32,["34"] = 32,["35"] = 32,["36"] = 32,["37"] = 37,["38"] = 38,["40"] = 40,["45"] = 45,["48"] = 46,["49"] = 47,["50"] = 50,["51"] = 51,["52"] = 55,["54"] = 58,["58"] = 62,["61"] = 63,["62"] = 64,["63"] = 65,["67"] = 69,["70"] = 70,["71"] = 71,["72"] = 72,["76"] = 76,["79"] = 77,["80"] = 78,["84"] = 82,["87"] = 83,["88"] = 84,["89"] = 85,["93"] = 89,["96"] = 90,["97"] = 91,["98"] = 92,["102"] = 96,["105"] = 97,["106"] = 98,["111"] = 103,["112"] = 104,["116"] = 24,["118"] = 111,["120"] = 112,["121"] = 113,["125"] = 119,["126"] = 120,["127"] = 123,["128"] = 123,["129"] = 123,["130"] = 123,["131"] = 128,["132"] = 129,["134"] = 117,["137"] = 131,["139"] = 117,["141"] = 111,["143"] = 138,["145"] = 139,["146"] = 140,["150"] = 146,["151"] = 146,["152"] = 146,["153"] = 148,["154"] = 149,["155"] = 150,["156"] = 153,["157"] = 154,["158"] = 154,["159"] = 154,["160"] = 154,["161"] = 154,["162"] = 154,["163"] = 154,["164"] = 159,["166"] = 161,["169"] = 144,["172"] = 164,["173"] = 165,["174"] = 165,["175"] = 165,["176"] = 165,["178"] = 144,["180"] = 138,["181"] = 172,["182"] = 173,["183"] = 174,["184"] = 177,["185"] = 177,["186"] = 177,["187"] = 177,["189"] = 178,["191"] = 182,["192"] = 183,["193"] = 184,["194"] = 185,["196"] = 187,["199"] = 180,["202"] = 190,["203"] = 191,["204"] = 191,["205"] = 191,["206"] = 191,["208"] = 180,["210"] = 177,["211"] = 177,["212"] = 195,["213"] = 196,["214"] = 200,["215"] = 200,["217"] = 201,["218"] = 202,["219"] = 203,["221"] = 200,["222"] = 205,["223"] = 172});
+__TS__SourceMapTraceBack(debug.getinfo(1).short_src, {["10"] = 7,["11"] = 7,["12"] = 8,["13"] = 8,["14"] = 9,["15"] = 9,["16"] = 10,["17"] = 10,["18"] = 10,["19"] = 10,["20"] = 16,["21"] = 19,["23"] = 24,["26"] = 25,["27"] = 26,["30"] = 27,["31"] = 28,["32"] = 31,["33"] = 32,["34"] = 32,["35"] = 32,["36"] = 32,["37"] = 32,["38"] = 32,["39"] = 38,["40"] = 39,["42"] = 41,["47"] = 46,["50"] = 47,["51"] = 48,["52"] = 51,["53"] = 52,["54"] = 56,["56"] = 59,["60"] = 63,["63"] = 64,["64"] = 65,["65"] = 66,["69"] = 70,["72"] = 71,["73"] = 72,["74"] = 73,["78"] = 77,["81"] = 78,["82"] = 79,["86"] = 83,["89"] = 84,["90"] = 85,["91"] = 86,["95"] = 90,["98"] = 91,["99"] = 92,["100"] = 93,["104"] = 97,["107"] = 98,["108"] = 99,["113"] = 104,["114"] = 105,["118"] = 24,["120"] = 112,["122"] = 113,["123"] = 114,["127"] = 120,["128"] = 121,["129"] = 124,["130"] = 124,["131"] = 124,["132"] = 124,["133"] = 129,["134"] = 130,["136"] = 118,["139"] = 132,["141"] = 118,["143"] = 112,["145"] = 139,["147"] = 140,["148"] = 141,["152"] = 147,["153"] = 147,["154"] = 147,["155"] = 149,["156"] = 150,["157"] = 151,["158"] = 154,["159"] = 155,["160"] = 155,["161"] = 155,["162"] = 155,["163"] = 155,["164"] = 155,["165"] = 155,["166"] = 160,["168"] = 162,["171"] = 145,["174"] = 165,["175"] = 166,["176"] = 166,["177"] = 166,["178"] = 166,["180"] = 145,["182"] = 139,["183"] = 173,["184"] = 174,["185"] = 175,["186"] = 178,["187"] = 178,["188"] = 178,["189"] = 178,["191"] = 179,["193"] = 183,["194"] = 184,["195"] = 185,["196"] = 186,["198"] = 188,["201"] = 181,["204"] = 191,["205"] = 192,["206"] = 192,["207"] = 192,["208"] = 192,["210"] = 181,["212"] = 178,["213"] = 178,["214"] = 196,["215"] = 197,["216"] = 201,["217"] = 201,["219"] = 202,["220"] = 203,["221"] = 204,["223"] = 201,["224"] = 206,["225"] = 173});
 local ____exports = {}
 local ____interfaces = require("framework.core.interfaces")
 local runtime = ____interfaces.runtime
@@ -16,6 +16,7 @@ local GatewayLogic = ____logic.GatewayLogic
 local ____protos = require("protos.index")
 local MessageId = ____protos.MessageId
 local proto = ____protos.proto
+local ErrorCode = ____protos.ErrorCode
 local data = __TS__New(ConnectionData)
 local logic = __TS__New(GatewayLogic, data)
 --- 命令分发处理
@@ -30,9 +31,10 @@ local function handleCommand(cmd, args)
                     local connId = __TS__AwaitSkynet(logic:handleConnect(clientInfo))
                     if runtime.codec then
                         local response = proto.gateway.ConnectResponse.create({
-                            success = connId > 0,
+                            code = connId > 0 and ErrorCode.SUCCESS or ErrorCode.INTERNAL_ERROR,
                             message = connId > 0 and "Connected successfully" or "Connection failed",
-                            sessionId = connId > 0 and "session_" .. tostring(connId) or nil
+                            connId = connId,
+                            serverTime = Date:now()
                         })
                         local encoded = runtime.codec:encode("gateway.ConnectResponse", response)
                         runtime.network:ret(connId, encoded)
@@ -126,7 +128,7 @@ local function handleHeartbeat(packetData)
             local clientTime = heartbeat.clientTime
             local response = proto.gateway.HeartbeatResponse.create({
                 serverTime = runtime.timer:now(),
-                clientTime = clientTime
+                onlineCount = logic:getOnlineCount()
             })
             local encoded = runtime.codec:encode("gateway.HeartbeatResponse", response)
             runtime.network:ret(encoded)
@@ -150,7 +152,7 @@ local function forwardToLogin(packetData)
             local ____temp_0 = runtime.codec:unpack(packetData)
             local msgId = ____temp_0.msgId
             local message = ____temp_0.message
-            if msgId == MessageId.LOGIN_REQ then
+            if msgId == MessageId.LOGIN_LOGIN_REQ then
                 local loginReq = message
                 runtime.logger:info("Forwarding login request: " .. loginReq.username)
                 local loginService = __TS__AwaitSkynet(runtime.service:newService("login"))

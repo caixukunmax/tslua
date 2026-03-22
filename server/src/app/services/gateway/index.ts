@@ -7,7 +7,7 @@
 import { runtime } from '../../../framework/core/interfaces';
 import { ConnectionData } from './data';
 import { GatewayLogic } from './logic';
-import { MessageId, proto } from '../../../protos';
+import { MessageId, proto, ErrorCode } from '../../../protos';
 import type { ClientInfo, AnyMessage } from './types';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import type { ConnectResponse as ProtoConnectResponse, HeartbeatResponse as ProtoHeartbeatResponse, LoginRequest as ProtoLoginRequest } from '../../../protos';
@@ -30,9 +30,10 @@ async function handleCommand(cmd: string, args: unknown[]): Promise<void> {
       // 使用 protobuf 返回连接响应
       if (runtime.codec) {
         const response = proto.gateway.ConnectResponse.create({
-          success: connId > 0,
+          code: connId > 0 ? ErrorCode.SUCCESS : ErrorCode.INTERNAL_ERROR,
           message: connId > 0 ? 'Connected successfully' : 'Connection failed',
-          sessionId: connId > 0 ? `session_${connId}` : undefined,
+          connId: connId,
+          serverTime: Date.now(),
         });
         const encoded = runtime.codec.encode('gateway.ConnectResponse', response);
         runtime.network.ret(connId, encoded);
@@ -122,7 +123,7 @@ async function handleHeartbeat(packetData: Uint8Array): Promise<void> {
     // 构建响应
     const response = proto.gateway.HeartbeatResponse.create({
       serverTime: runtime.timer.now(),
-      clientTime: clientTime,
+      onlineCount: logic.getOnlineCount(),
     });
 
     const encoded = runtime.codec.encode('gateway.HeartbeatResponse', response);
@@ -145,7 +146,7 @@ async function forwardToLogin(packetData: Uint8Array): Promise<void> {
     // 解包登录请求
     const { msgId, message } = runtime.codec.unpack(packetData);
 
-    if (msgId === MessageId.LOGIN_REQ) {
+    if (msgId === MessageId.LOGIN_LOGIN_REQ) {
       const loginReq = message as ProtoLoginRequest;
       runtime.logger.info(`Forwarding login request: ${loginReq.username}`);
 

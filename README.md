@@ -108,6 +108,77 @@ TS-Skynet Hybrid 是一个创新的游戏服务端开发框架，解决了以下
 
 ---
 
+## ⚙️ 环境要求
+
+### 基础环境（必需）
+
+- **Node.js**: 20+ ([下载](https://nodejs.org/))
+- **npm**: 9+ (随 Node.js 一起安装)
+
+### Windows 特有依赖（仅 Windows 用户需要）
+
+如果你在 Windows 上开发和部署，需要安装：
+
+#### 1. .NET 8.0 SDK
+
+**用途**: Luban 配置表编译工具需要
+
+**下载地址**: https://dotnet.microsoft.com/download/dotnet/8.0
+
+**安装步骤**:
+1. 下载 `.NET SDK 8.0.x` (不是 Runtime)
+2. 运行安装程序
+3. 重启终端验证：`dotnet --version`
+
+> 💡 注意：Luban 需要完整的 SDK，不仅仅是 Runtime
+
+#### 2. Docker Desktop + WSL2
+
+**用途**: 运行 Skynet 生产环境容器
+
+**安装步骤**:
+
+1. **启用 WSL2**:
+   ```powershell
+   # 以管理员身份运行 PowerShell
+   wsl --install
+   wsl --set-default-version 2
+   ```
+
+2. **安装 Docker Desktop**:
+   - 下载：https://www.docker.com/products/docker-desktop/
+   - 安装时勾选 "Use WSL 2 instead of Hyper-V"
+   - 启动 Docker Desktop
+
+3. **验证安装**:
+   ```bash
+   docker --version
+   docker-compose --version
+   wsl --list --verbose
+   ```
+
+> 📖 详细指南：[docs/Windows Docker 部署指南.md](docs/Windows%20Docker 部署指南.md)
+
+### Linux/macOS
+
+- **Docker**: `sudo apt install docker.io` 或 `brew install docker`
+- **.NET 8.0 SDK**: Luban 需要（如果不需要编译配置表可跳过）
+
+---
+
+## ✅ 快速验证环境
+
+```bash
+# 检查所有依赖
+node --version          # 应显示 v20+
+npm --version           # 应显示 9+
+dotnet --version        # 应显示 8.0.x (Windows 必需)
+docker --version        # 应显示 Docker version
+docker-compose --version # 应显示 Docker Compose version
+```
+
+---
+
 ## 🏗️ 架构设计
 
 ### 核心理念

@@ -8,7 +8,7 @@ import { runtime } from '../../../framework/core/interfaces';
 import { PlayerData } from './data';
 import { GameLogic } from './logic';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { MessageId, proto } from '../../../protos';
+import { MessageId, proto, ErrorCode } from '../../../protos';
 import type { PlayerUpdate } from './types';
 
 // 数据层：持久化状态，不热更
@@ -29,13 +29,14 @@ async function handleCommand(cmd: string, args: unknown[]): Promise<void> {
       // 使用 protobuf 序列化响应
       if (runtime.codec && player) {
         const response = proto.game.EnterGameResponse.create({
-          success: true,
-          playerInfo: {
+          code: ErrorCode.SUCCESS,
+          message: 'Enter game success',
+          player: {
             userId: player.userId,
-            username: `Player_${player.userId}`,
             level: player.level,
             exp: player.exp,
             gold: player.gold,
+            enterTime: Date.now(),
           },
         });
         const encoded = runtime.codec.encode('game.EnterGameResponse', response);
@@ -61,10 +62,10 @@ async function handleCommand(cmd: string, args: unknown[]): Promise<void> {
       if (runtime.codec && player) {
         const playerInfo = proto.game.PlayerInfo.create({
           userId: player.userId,
-          username: `Player_${player.userId}`,
           level: player.level,
           exp: player.exp,
           gold: player.gold,
+          enterTime: Date.now(),
         });
         const encoded = runtime.codec.encode('game.PlayerInfo', playerInfo);
         runtime.network.ret(true, encoded);

@@ -3,13 +3,13 @@
  * =============================================================================
  * Protocol Buffers 编译脚本
  * 功能：编译 .proto 文件生成 Lua 描述文件和 TypeScript 代码
- * 特点：跨平台支持（Windows/Linux/Mac）
+ * 特点：跨平台支持（Windows/Linux/Mac），使用 ts-proto 生成纯 TS 类型
  * =============================================================================
  */
 
 import path from 'path';
 import fs from 'fs';
-import { execSync, spawnSync } from 'child_process';
+import { execSync } from 'child_process';
 import { globSync } from 'glob';
 import { fileURLToPath } from 'url';
 
@@ -55,7 +55,6 @@ function error(msg: string): void {
 // 主逻辑
 // =============================================================================
 function main(): void {
-  // 获取脚本所在目录
   const scriptDir = path.dirname(__filename);
   const baseDir = path.resolve(scriptDir, '..');
 
@@ -77,24 +76,21 @@ function main(): void {
 
   // 收集所有 proto 文件
   const allProtoFiles: string[] = [];
-
   for (const protoDir of config.proto_dirs) {
     const fullDir = path.resolve(baseDir, protoDir);
     if (!fs.existsSync(fullDir)) {
       warn(`Proto directory not found: ${fullDir}`);
       continue;
     }
-
     info(`Scanning proto directory: ${protoDir}`);
     const protoFiles = globSync('**/*.proto', { cwd: fullDir }).sort();
-
     for (const file of protoFiles) {
       allProtoFiles.push(path.join(fullDir, file));
     }
   }
 
   if (allProtoFiles.length === 0) {
-    error('No .proto files found in configured directories');
+    error('No .proto files found');
     process.exit(1);
   }
 
@@ -104,25 +100,15 @@ function main(): void {
   }
   console.log('');
 
-  // 查找 protoc 命令
+  // 查找 protoc
   let protocCmd: string | null = null;
   try {
-    // 先检查系统 PATH 中的 protoc
     execSync('protoc --version', { stdio: 'ignore' });
     protocCmd = 'protoc';
   } catch {
-    // 检查本地 bin 目录中的 protoc
     const localProtoc = path.join(baseDir, 'bin', 'protoc.exe');
     if (fs.existsSync(localProtoc)) {
       protocCmd = localProtoc;
-    } else {
-      // 检查 node_modules 中的 protoc
-      const npmProtoc = path.join(baseDir, 'node_modules', '.bin', 'protoc');
-      if (fs.existsSync(npmProtoc)) {
-        protocCmd = npmProtoc;
-      } else {
-        warn('protoc not found, skipping .desc generation');
-      }
     }
   }
 
@@ -154,17 +140,13 @@ function main(): void {
       }
     }
     console.log('');
-  } else {
-    warn('Skipping .desc generation (protoc not available)');
-    console.log('');
   }
 
-  // 生成 TypeScript 代码
+  // 生成 TypeScript 代码 (使用 ts-proto)
   console.log('----------------------------------------');
-  info('Generating TypeScript files...');
+  info('Generating TypeScript files with ts-proto...');
   console.log('----------------------------------------');
 
-  // 创建输出目录
   for (const tsDir of config.output_ts) {
     const fullTsDir = path.resolve(baseDir, tsDir);
     fs.mkdirSync(fullTsDir, { recursive: true });
@@ -173,71 +155,270 @@ function main(): void {
 
   const firstTsDir = path.resolve(baseDir, config.output_ts[0]);
 
-  // 检查 protobufjs-cli
-  let hasPbjs = false;
-  try {
-    execSync('npm list pbjs', { stdio: 'ignore', cwd: baseDir });
-    hasPbjs = true;
-  } catch {
-    try {
-      execSync('npm list -g pbjs', { stdio: 'ignore' });
-      hasPbjs = true;
-    } catch {
-      hasPbjs = false;
-    }
+  if (!protocCmd) {
+    error('protoc not found');
+    process.exit(1);
   }
 
-  if (hasPbjs) {
-    // 生成静态模块
-    try {
-      const protoJsPath = path.join(firstTsDir, 'proto.js');
-      const args = ['pbjs', '-t', 'static-module', '-w', 'commonjs', '-o', protoJsPath, ...allProtoFiles];
-      const result = spawnSync('npx', args, { stdio: 'ignore', cwd: baseDir });
-
-      if (result.status === 0) {
-        success('proto.js');
-      } else {
-        warn('proto.js (failed, using handwritten version)');
-      }
-    } catch {
-      warn('proto.js (failed, using handwritten version)');
-    }
-
-    // 生成类型定义
-    const protoJsPath = path.join(firstTsDir, 'proto.js');
-    if (fs.existsSync(protoJsPath)) {
-      try {
-        const protoDtsPath = path.join(firstTsDir, 'proto.d.ts');
-        const args = ['pbts', '-o', protoDtsPath, protoJsPath];
-        const result = spawnSync('npx', args, { stdio: 'ignore', cwd: baseDir });
-
-        if (result.status === 0) {
-          success('proto.d.ts');
-        } else {
-          warn('proto.d.ts (failed)');
-        }
-      } catch {
-        warn('proto.d.ts (failed)');
-      }
-    }
+  // 查找 ts-proto 插件
+  const projectRoot = path.resolve(baseDir, '..');
+  const tsProtoPlugin = path.join(projectRoot, 'node_modules', '.bin', 'protoc-gen-ts_proto.cmd');
+  const tsProtoPluginAlt = path.join(projectRoot, 'node_modules', '.bin', 'protoc-gen-ts_proto');
+  
+  let pluginPath: string;
+  if (fs.existsSync(tsProtoPlugin)) {
+    pluginPath = tsProtoPlugin;
+  } else if (fs.existsSync(tsProtoPluginAlt)) {
+    pluginPath = tsProtoPluginAlt;
   } else {
-    warn('protobufjs-cli not installed, skipping auto-generation');
-    info('Using handwritten proto.ts');
+    error('ts-proto plugin not found. Run: npm install ts-proto');
+    process.exit(1);
   }
+
+  info(`Using protoc: ${protocCmd}`);
+  info(`Using ts-proto plugin: ${pluginPath}`);
+
+  // 为每个 proto 文件生成 TypeScript
+  for (const protoFile of allProtoFiles) {
+    const filename = path.basename(protoFile, '.proto');
+    const protoPath = path.dirname(protoFile);
+
+    try {
+      const args = [
+        `--plugin=protoc-gen-ts_proto=${pluginPath}`,
+        `--ts_proto_out=${firstTsDir}`,
+        `--ts_proto_opt=outputServices=false,onlyTypes=true,useExactTypes=false,stringEnums=false,useOptionals=messages`,
+        `--proto_path=${protoPath}`,
+        protoFile
+      ];
+
+      execSync(`"${protocCmd}" ${args.join(' ')}`, { stdio: 'pipe' });
+      success(`${filename}.ts`);
+    } catch (err) {
+      warn(`${filename}.ts (failed)`);
+      if (err instanceof Error) {
+        console.error(err.message);
+      }
+    }
+  }
+
+  // 生成 index.ts 导出文件
+  const indexTsPath = path.join(firstTsDir, 'index.ts');
+  const indexContent = generateIndexTs(firstTsDir);
+  fs.writeFileSync(indexTsPath, indexContent);
+  success('index.ts (generated)');
 
   console.log('');
   console.log('========================================');
   success('Protocol compilation complete!');
   console.log('========================================');
   console.log('');
-  console.log('Output:');
-  for (const luaDir of config.output_lua) {
-    console.log(`  Lua descriptors: ${luaDir}/*.desc`);
+}
+
+// 生成 index.ts 内容（自动解析类型并生成 create 辅助函数）
+function generateIndexTs(protosDir: string): string {
+
+  // 解析生成的 .ts 文件，提取类型信息
+  const typeInfos = parseGeneratedTypes(protosDir);
+
+  // 生成导出语句
+  const exportLines: string[] = [];
+  const importLines: string[] = [];
+
+  // 收集所有模块
+  const modules = new Map<string, string[]>();
+  for (const info of typeInfos) {
+    if (!modules.has(info.module)) {
+      modules.set(info.module, []);
+    }
+    modules.get(info.module)!.push(info.name);
   }
-  for (const tsDir of config.output_ts) {
-    console.log(`  TypeScript: ${tsDir}/proto.{ts,js,d.ts}`);
+
+  // 生成导出
+  for (const [module, names] of modules) {
+    const enums = names.filter(n => typeInfos.find(t => t.name === n && t.isEnum));
+    const types = names.filter(n => typeInfos.find(t => t.name === n && !t.isEnum));
+
+    if (enums.length > 0) {
+      exportLines.push(`export { ${enums.join(', ')} } from './${module}';`);
+    }
+    if (types.length > 0) {
+      exportLines.push(`export type { ${types.join(', ')} } from './${module}';`);
+    }
   }
-  console.log('');
+
+  // 生成导入（用于 create 方法）
+  for (const [module, names] of modules) {
+    const enums = names.filter(n => typeInfos.find(t => t.name === n && t.isEnum));
+    const types = names.filter(n => typeInfos.find(t => t.name === n && !t.isEnum));
+    if (enums.length > 0) {
+      importLines.push(`import { ${enums.join(', ')} } from './${module}';`);
+    }
+    if (types.length > 0) {
+      importLines.push(`import type { ${types.join(', ')} } from './${module}';`);
+    }
+  }
+
+  // 生成 proto 对象
+  const protoLines: string[] = [
+    '// 通用 create 辅助函数',
+    'function createMessage<T>(defaults: Partial<T>, init?: Partial<T>): T {',
+    '  return { ...defaults, ...init } as T;',
+    '}',
+    '',
+    '// 创建 proto 对象（自动生成）',
+    'export const proto = {',
+  ];
+
+  // 按模块分组生成 create 方法
+  for (const [module, names] of modules) {
+    const moduleTypes = typeInfos.filter(t => t.module === module);
+    protoLines.push(`  ${module}: {`);
+
+    for (const name of names) {
+      const info = moduleTypes.find(t => t.name === name);
+      if (!info) continue;
+
+      if (info.isEnum) {
+        // 枚举直接引用
+        protoLines.push(`    ${name},`);
+      } else {
+        // 生成 create 方法
+        const defaults = generateDefaults(info);
+        protoLines.push(`    ${name}: {`);
+        protoLines.push(`      create: (init?: Partial<${name}>): ${name} =>`);
+        protoLines.push(`        createMessage(${defaults}, init),`);
+        protoLines.push(`    },`);
+      }
+    }
+    protoLines.push('  },');
+  }
+
+  protoLines.push('};');
+  protoLines.push('');
+  protoLines.push('export default proto;');
+
+  return `/**
+ * Protocol Buffers TypeScript 定义
+ * 由 ts-proto 自动生成
+ * 源文件: protocols/proto/*.proto
+ * 生成命令: npm run build:proto
+ */
+
+${exportLines.join('\n')}
+
+${importLines.join('\n')}
+
+${protoLines.join('\n')}
+`;
+}
+
+// 解析生成的类型文件
+function parseGeneratedTypes(protosDir: string): TypeInfo[] {
+  const types: TypeInfo[] = [];
+
+  const files = fs.readdirSync(protosDir).filter(f => f.endsWith('.ts') && f !== 'index.ts');
+
+  for (const file of files) {
+    const module = path.basename(file, '.ts');
+    const content = fs.readFileSync(path.join(protosDir, file), 'utf-8');
+
+    // 解析枚举
+    const enumRegex = /export enum (\w+)\s*\{([^}]+)\}/g;
+    let match;
+    while ((match = enumRegex.exec(content)) !== null) {
+      types.push({
+        module,
+        name: match[1],
+        isEnum: true,
+        isEnumType: false,
+        fields: [],
+      });
+    }
+
+    // 解析接口
+    const interfaceRegex = /export interface (\w+)\s*\{([^}]+(?:\{[^}]*\}[^}]*)*)\}/g;
+    while ((match = interfaceRegex.exec(content)) !== null) {
+      const name = match[1];
+      const body = match[2];
+      const fields = parseFields(body);
+
+      types.push({
+        module,
+        name,
+        isEnum: false,
+        isEnumType: fields.some(f => f.type.includes('ErrorCode')),
+        fields,
+      });
+    }
+  }
+
+  return types;
+}
+
+// 解析字段
+function parseFields(body: string): FieldInfo[] {
+  const fields: FieldInfo[] = [];
+  const lines = body.split('\n').map(l => l.trim()).filter(l => l && !l.startsWith('*') && !l.startsWith('//'));
+
+  for (const line of lines) {
+    // 匹配: fieldName?: Type; 或 fieldName: Type;
+    const fieldMatch = line.match(/^(\w+)\??:\s*(.+?);?$/);
+    if (fieldMatch) {
+      const name = fieldMatch[1];
+      const type = fieldMatch[2].replace(/;$/, '').trim();
+      const isOptional = line.includes('?');
+      fields.push({ name, type, isOptional });
+    }
+  }
+
+  return fields;
+}
+
+// 生成默认值
+function generateDefaults(info: TypeInfo): string {
+  const defaults: string[] = [];
+
+  for (const field of info.fields) {
+    const defaultVal = getDefaultValue(field.type, field.isOptional);
+    defaults.push(`${field.name}: ${defaultVal}`);
+  }
+
+  return `{ ${defaults.join(', ')} }`;
+}
+
+// 获取类型的默认值
+function getDefaultValue(type: string, isOptional: boolean): string {
+  if (isOptional) return 'undefined';
+
+  // 移除数组标记和联合类型
+  const baseType = type.replace(/\[\]/g, '').replace(/\|\s*undefined/g, '').replace(/\|\s*null/g, '').trim();
+
+  if (baseType === 'string') return "''";
+  if (baseType === 'number' || baseType === 'long') return '0';
+  if (baseType === 'boolean') return 'false';
+  if (baseType === 'Uint8Array') return 'new Uint8Array(0)';
+  if (baseType === 'ErrorCode') return 'ErrorCode.SUCCESS';
+
+  // 数组类型
+  if (type.includes('[]')) return '[]';
+
+  // 嵌套类型
+  return 'undefined';
+}
+
+interface TypeInfo {
+  module: string;
+  name: string;
+  isEnum: boolean;
+  isEnumType: boolean;  // 是否包含 ErrorCode 字段
+  fields: FieldInfo[];
+}
+
+interface FieldInfo {
+  name: string;
+  type: string;
+  isOptional: boolean;
 }
 
 // 运行主函数
